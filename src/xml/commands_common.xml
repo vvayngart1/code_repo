@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="common_commands">
+    <CommandsDefs>
+    	<eStratAction    type="enum">
+            <Start/>
+            <Stop/>
+            <NoOrders/>
+            <Status/>
+    	</eStratAction>        
+        
+        <StratParams      type="struct" serializable="true" commandable="true">
+            <!-- Main fields -->
+            <!-- -->
+            <name                   type="std::string"              desc="Strategy's name"/>
+            <strategyId             type="tw::risk::TStrategyId"    desc="Strategy Id"/>
+            <action                 type="eStratAction"             desc="Action for the strategy to take (see enum)"/>
+        </StratParams>
+        
+        <ProcessorPnL      type="struct" serializable="true" commandable="true">
+            <!-- Main fields -->
+            <!-- -->
+            <accountId      type="tw::channel_or::TAccountId"   desc="account id"/>
+            <strategyId     type="tw::channel_or::TStrategyId"  desc="strategy id"/>
+            <results        type="std::string"                  desc="results (if any) of action"/>
+        </ProcessorPnL>
+        
+        <ChannelOrCme      type="struct" serializable="true" commandable="true">
+            <!-- Main fields -->
+            <!-- -->
+            <results        type="std::string"                  desc="results (if any) of action"/>
+            <exSessionName  type="std::string"                  desc="exchange's session name (if any)"/>
+        </ChannelOrCme>
+    </CommandsDefs>
+</Namespace>

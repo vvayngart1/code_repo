@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="scalper" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <xi:include href="common_trade_blocks_include.xml"/>
+    <Defs>
+        <eState             type="enum">
+            <Neutral/>
+            <Signal/>
+            <Flattening/>
+    	</eState>
+          
+        <eStratAction       type="enum">
+            <Change/>
+            <ChangeConfig/>
+            <Status/>
+    	</eStratAction>
+        
+        <eStratMode         type="enum">
+            <Flat/>
+            <Long/>
+            <Short/>
+            <Exit/>
+            <ExitEasy/>
+            <Cancel/>
+    	</eStratMode>
+        
+        <eOrdersMode        type="enum">
+            <Normal/>
+            <Close/>
+            <NoOrders/>
+    	</eOrdersMode>
+        
+        <eActionType        type="enum">
+            <BuyOpen/>
+            <SellOpen/>
+            <SellClose/>
+            <BuyClose/>    
+        </eActionType>
+        
+        <eEntryStyleType        type="enum">
+            <Manual/>
+            <WickSignal/>
+            <SoldierSignal/>
+            <TransitionSignal/>
+            <CramSignal/>
+            <ContinuationTradeSignal/>
+            <VertSignal/>
+            <HookReversalSignal/>
+            <PiercingEngulfingReversalSignal/>
+            <ORBreakoutSignal/>
+            <ORBounceSignal/>
+            <ORWhipSignal/>
+        </eEntryStyleType>
+        
+        <ScalperParamsWire      type="struct" serializable="true" commandable="true" parents="BarsTrailingStopLossParamsWire,ActivePriceParamsWire,CramStopLossParamsWire,InitialEdgeDefenseStopLossParamsWire,StopLossTriggerParamsWire,WickSignalParamsWire,SoldierSignalParamsWire,VertSignalParamsWire,TransitionSignalParamsWire,CramSignalParamsWire,RatioCramParamsWire,RatioCramRiskDefenseParamsWire,ContinuationTradeSignalParamsWire,IcebergDetectorParamsWire,MarketActivityParamsWire,KeltnerBandProcessorParamsWire,ATRPricingParamsWire,BaseReversalParamsWire,HookReversalParamsWire,PiercingEngulfingReversalParamsWire,ORBreakoutSignalParamsWire">
+            <!-- General params -->
+            <!-- -->
+            <name                       type="std::string"          desc="Strategy's name"/>
+            <strategy_guid              type="std::string"          desc="Strategy's unique id (guid)"  maxlen="64"/>
+            <accountId                  type="tw::risk::TAccountId"/>
+            <sub_accountId              type="tw::risk::TAccountId"/>
+            <displayName                type="std::string"          desc="display name of instrument (e.g. MSFT, ESH3, etc.)"/>
+            <exchange                   type="tw::instr::eExchange" desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.)"/>
+            <barLength                  type="uint32_t"             desc="in seconds"/>
+            <betSize                    type="tw::price::Size"/>
+            <payupTicks                 type="tw::price::Ticks"/>
+            <profitTicks                type="tw::price::Ticks"/>
+            <stopTicks                  type="tw::price::Ticks"/>
+            <stopLossPayupTicks         type="tw::price::Ticks"/>
+            <stopInitialDelayMs         type="uint32_t"/>
+            <passiveOffsetTicks         type="tw::price::Ticks"/>
+            <entryStyle                 type="eEntryStyleType"/>
+            <atrNumOfPeriods            type="uint32_t"/>
+            <trailingStopBarLength      type="uint32_t"             desc="in seconds"/>
+            
+            <!-- Utility params -->
+            <!-- -->
+            <loss_limit                 type="float"/>
+            <maxRealizedDrawdown        type="float"/>
+            <maxUnrealizedDrawdown      type="float"/>
+            <maxRealizedLoss            type="float"/>
+            <maxUnrealizedLoss          type="float"/>
+            <enabled                    type="bool"/>
+        </ScalperParamsWire>
+        
+        <ScalperParamsWireExtended      type="struct" serializable="true" commandable="true" parents="ScalperParamsWire">
+            <strategyId                     type="tw::risk::TStrategyId"/>
+            <state                          type="eState"/>
+            <action                         type="eStratAction"/>
+            <mode                           type="eStratMode"/>
+            <orderMode                      type="eOrdersMode"/>
+            <isExchangeUp                   type="bool"/>
+            
+            <!-- internal metrics -->
+            <AT                             type="eActionType"/>
+            <peak_unrealized                type="float"/>
+            <wbo                            type="float"/>
+            
+            <!-- in-trade metrics -->
+            <confirmed                      type="bool"             desc="scratch protection"/>
+            <cram_confirmed                 type="bool"             desc="cram protection"/>
+            <seconds_from_enter             type="uint32_t"/>
+            <slide_active                   type="bool"/>
+            <recent_price_enter             type="double"/>
+            <recent_price_order             type="double"/>
+            <recent_stop_price              type="double"/>
+                 
+            <!-- internal global states -->
+            <trigger_guid                   type="std::string"      desc="Trigger uinque id (guid)"  maxlen="64"/>    
+            <wbo_open                       type="float"/>
+            <open_filled                    type="bool"/>
+            <new_rej_counter                type="uint32_t"/>
+            <cxl_rej_counter                type="uint32_t"/>
+            
+            <!-- book-keeping -->
+            <enter_order_price              type="tw::price::Ticks"/>
+            <wbo_assigned                   type="bool"/>
+            <side                           type="tw::channel_or::eOrderSide"/>
+            <barIndex                       type="uint32_t"/>
+            <wickSignalProcessedBarIndex    type="uint32_t"/>
+            <soldierSignalProcessedBarIndex type="uint32_t"/>
+            <tSignalProcessedBarIndex       type="uint32_t"/>
+            
+            <maxUnrealizedPnl               type="float"                                serializable='false'/>
+            <minUnrealizedPnl               type="float"                                serializable='false'/>
+            <settings                       type="tw::common::Settings"                 serializable='false'/>
+            <instrument                     type="tw::instr::InstrumentPtr"             serializable='false'/>
+            <connectionsCount               type="int32_t"                              serializable='false'/>                                            
+            <quote                          type="tw::price::Quote"                     serializable='false'/>
+        </ScalperParamsWireExtended>        
+    </Defs>    
+    <SQLDefs>
+        <Tables>
+            <Scalper timestamp="false">
+                <Fields>
+                    <ScalperParamsWire/>
+                </Fields>
+                <PrimaryKeys>
+                    <strategy_guid      length="64"/>
+                </PrimaryKeys>
+            </Scalper>
+        </Tables>
+        <Queries>
+            <Scalper_GetAllForAccount>
+                <Type value="SELECT"/>
+                <Source value="Scalper"/>
+                <Filter value="accountId = '?'"/>
+                <Params>
+                    <account_name   type="tw::risk::TAccountId"/>
+                </Params>
+                <Outputs>
+                    <ScalperParamsWire/>
+                </Outputs>
+            </Scalper_GetAllForAccount>
+        </Queries>
+    </SQLDefs>
+</Namespace>

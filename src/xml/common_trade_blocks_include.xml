@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Defs>
+    <eStopLossCycleMode        type="enum">
+        <Anchor/>
+        <Float/>
+    </eStopLossCycleMode>
+    
+    <eWickBarToPatternDir        type="enum">
+        <Same/>
+        <Opposite/>
+        <Either/>
+    </eWickBarToPatternDir>
+    
+    <eContinuationTradeSignalState        type="enum">
+        <Signaled/>
+        <Validated/>
+        <Cancelled/>
+    </eContinuationTradeSignalState>
+    
+    <eTradeBias        type="enum">
+        <Neutral/>
+        <Long/>
+        <Short/>
+        <NoTrades/>
+    </eTradeBias>
+    
+    <eBarPositionToKeltnerBand        type="enum">
+        <High/>
+        <Low/>
+        <Middle/>
+    </eBarPositionToKeltnerBand>
+    
+    <eFailSignalType          type="enum">
+        <!-- trans bar violations -->
+        <TransBarInvalidRange/>
+        <TransBarInvalidAtr/>
+        <TransBarInvalidIndex/>
+        <TransBarInvalidFulcrumIndex/>
+        <TrendSwingCase0/>
+        <TrendSwingCase1/>
+        <TrendSwingCase2/>
+        <TrendSwingCase3/>         
+
+        <!-- timing violations -->
+        <TimeToSignalViolation/>
+        <MaxBarsToPersistViolation/>
+        
+        <!-- fulcrum violations -->
+        <FulcrumBarsToPersistViolation/>
+        <FulcrumBarCloseViolation/>
+        <FulcrumMinVolViolation/>
+        <FulcrumZeroVolViolation/>
+        <FulcrumLowVolViolation/>
+        <FulcrumHighVolViolation/>
+        <FulcrumRatioViolation/>
+        
+        <!-- first have read logic type -->
+        <ReadAboveViolation/>
+        <ReadBelowViolation/>
+        <ReadAboveNotSatisfied/>
+        <ReadBelowNotSatisfied/>
+
+        <!-- second have T Bar logic type -->
+        <UpTBarStopViolation/>
+        <UpTBarMaxViolation/>
+        <UpTBarLowPrice/>
+        <UpTBarVolNotSatisfied/>
+        <UpTBarRatioNotSatisfied/>
+        <UpTBarTradePriceInvalid/>
+
+        <DownTBarStopViolation/>
+        <DownTBarMaxViolation/>
+        <DownTBarHighPrice/>
+        <DownTBarVolNotSatisfied/>
+        <DownTBarRatioNotSatisfied/>
+        <DownTBarTradePriceInvalid/>
+        
+        <!-- third have large bar type -->
+        <LargeBarMaxHigh/>
+        <LargeBarMaxLow/>
+        <LargeBarCloseOutsideViolation/>
+    </eFailSignalType>
+    
+    <eATRPricingPayUpStyle   type="enum">
+        <Static/>
+        <Dynamic/>
+    </eATRPricingPayUpStyle>
+    
+    <eHookReversalEntryStyle   type="enum">
+        <KeltnerBand/>
+        <InTrend/>
+        <Both/>
+    </eHookReversalEntryStyle>
+    
+    <eHookReversalState        type="enum">
+        <FirstBarSatisfied/>
+        <SecondBarSatisfied/>
+    </eHookReversalState>
+    
+    <ePiercingEngulfingReversalEntryStyle   type="enum">        
+        <InTrend/>
+        <Both/>
+    </ePiercingEngulfingReversalEntryStyle>
+    
+    <ePiercingEngulfingReversalState        type="enum">
+        <FirstBarSatisfied/>
+    </ePiercingEngulfingReversalState>
+    
+    <eDefenseBarsTrailingStopMode           type="enum">
+        <WorstBar/>
+        <CurrentBar/>
+    </eDefenseBarsTrailingStopMode>
+    
+    <eTransitionBarSlideMode                type="enum">
+        <Bar/>
+        <Close/>
+        <Off/>
+    </eTransitionBarSlideMode>
+        
+    <FillInfo        type="struct"  serializable="true">            
+        <stop            type="tw::price::Ticks"/>
+        <timerCounter    type="uint32_t"/>
+        <exitOrderSide   type="tw::channel_or::eOrderSide"/>
+        <trigger_guid    type="std::string"                      desc="Triggers' uinque id (guid)"  maxlen="64"/>
+        <barIndex        type="uint32_t"/>
+        <barIndex2       type="uint32_t"/>
+        <fill            type="tw::channel_or::Fill"         serializable='false'/>
+        <exitOrder       type="tw::channel_or::TOrderPtr"    serializable='false'/>            
+    </FillInfo>
+
+    <TimerStopLossParamsWire    type="struct" serializable="true" commandable="true">
+        <cycleLength             type="uint32_t"                 desc="in seconds"/>
+        <cycleLBound             type="uint32_t"                 desc="in seconds"/>
+        <cycleUBound             type="uint32_t"                 desc="in seconds"/>
+        <stopLossCycleMode       type="eStopLossCycleMode"/>                                                
+        <stopLossCycleLBound     type="tw::price::Ticks"/>
+        <stopLossCycleUBound     type="tw::price::Ticks"/>           
+        <takeProfitCycleLBound   type="tw::price::Ticks"/>
+        <takeProfitCycleUBound   type="tw::price::Ticks"/>
+        <!-- Bookkeeping params -->
+        <!-- -->
+        <strategyInfo            type="std::string"          serializable='false'/>
+        <cycleLBoundTimerId      type="tw::common::TTimerId" serializable='false'/>
+        <cycleUBoundTimerId      type="tw::common::TTimerId" serializable='false'/>
+    </TimerStopLossParamsWire>       
+
+    <TrailingStopLossParamsWire  type="struct" serializable="true" commandable="true">
+        <beginTrailingStopTicks      type="tw::price::Ticks"/>
+        <trailingStopOffsetTicks     type="tw::price::Ticks"/>
+    </TrailingStopLossParamsWire>
+    
+    <StopLossTriggerParamsWire  type="struct" serializable="true" commandable="true">
+        <minStopTriggerQty           type="tw::price::Size"/>
+    </StopLossTriggerParamsWire>
+
+    <BarsTrailingStopLossParamsWire    type="struct" serializable="true" commandable="true">
+        <barsCountToStart            type="int32_t"/>
+        <barTrailingStopOffsetTicks  type="tw::price::Ticks"/>
+        <barTrailingCntToStartTicks  type="tw::price::Ticks"/>
+        <slideBehindBetterBar        type="bool"/>
+        <transitionBarSlideMode     type="eTransitionBarSlideMode"/>
+    </BarsTrailingStopLossParamsWire>
+    
+    <DefenseBarsTrailingStopLossParamsWire    type="struct" serializable="true" commandable="true">
+        <dbBarsCountToStart            type="int32_t"/>
+        <dbMode                        type="eDefenseBarsTrailingStopMode"/>
+        <dbLastProcessedBarIndex       type="uint32_t"                        serializable='false'/>
+    </DefenseBarsTrailingStopLossParamsWire>
+    
+    <CramStopLossParamsWire    type="struct" serializable="true" commandable="true">
+        <initialCramStopEvalTicks    type="tw::price::Ticks"/>
+        <initialCramPopTicks         type="tw::price::Ticks"/>
+        <initialCramOffsetTicks      type="tw::price::Ticks"/>
+        <initialCramFirmPriceQty     type="tw::price::Size"/>
+        <initialCramVolGood          type="tw::price::Size"/>
+        <initialCramRatio            type="float"/>
+        <initialCramDisabled         type="bool"/>
+        <cramSlideRatio              type="float"                  desc="disabled if set to '0'"/>
+        <cramMinATRMult              type="float"                  desc="disabled if set to '0'"/>
+        <firmPriceQty                type="tw::price::Size"        desc="disabled if set to '0'"/>
+        <firmPriceOffsetTicks        type="tw::price::Ticks"/>
+        <minBarDispToCramTicks       type="tw::price::Ticks"/>
+        <initialCramStopSet          type="bool"                    serializable='false'/>
+        <topOfBook                   type="tw::price::PriceLevel"   serializable='false'/>        
+    </CramStopLossParamsWire>
+    
+    <InitialEdgeDefenseStopLossParamsWire    type="struct" serializable="true" commandable="true">        
+        <slideStopOnProfitTicks1     type="tw::price::Ticks"/>
+        <slideStopPayupTicks1        type="tw::price::Ticks"/>
+        <slideStopOnProfitTicks2     type="tw::price::Ticks"/>
+        <slideStopPayupTicks2        type="tw::price::Ticks"/>
+    </InitialEdgeDefenseStopLossParamsWire>
+    
+    <VertSignalParamsWire type="struct" serializable="true" commandable="true">
+        <C1                           type="float"/>
+        <init_multiplier	      type="float"/>
+        <max_enter_multiplier         type="float"/>
+        <alpha                        type="float"/>
+        <alpha_multiplier             type="float"/>
+        <window                       type="uint32_t"/>
+        <local_window                 type="uint32_t"/>
+        <local_min_counter            type="uint32_t"/>
+        <flip_mode                    type="bool"/>
+        <speed_upper                  type="float"/>
+        <speed_lower                  type="float"/>
+        <allquotes_mode               type="bool"/>
+        <vel_multiplier               type="float"/>
+        
+        <alpha_new                    type="float"                     serializable='false'/>
+        <w                            type="float"                     serializable='false'/>
+        <x                            type="float"                     serializable='false'/>
+        <vel		              type="float"                     serializable='false'/>
+        <x_vel                        type="float"                     serializable='false'/>
+        <score                        type="float"                     serializable='false'/>
+        <score_prev                   type="float"                     serializable='false'/>
+        <local_assigned               type="bool"                      serializable='false'/>
+        <local                        type="float"                     serializable='false'/>
+        <local_prev                   type="float"                     serializable='false'/>
+        <local_counter                type="uint32_t"                  serializable='false'/>
+        <initialized	              type="bool"                      serializable='false'/>
+        <firstrow                     type="bool"                      serializable='false'/>
+        <recentmax                   type="float"                     serializable='false'/>
+        
+        <wbos                         type="std::deque&lt;double&gt;"  serializable='false'/>
+        <scores                       type="std::deque&lt;double&gt;"  serializable='false'/>
+        <locals                       type="std::deque&lt;double&gt;"  serializable='false'/>
+        <local_scores                 type="std::deque&lt;double&gt;"  serializable='false'/>
+        <timerId_everySecond          type="tw::common::TTimerId"      serializable='false'/>
+        <timerId_refreshUnits         type="tw::common::TTimerId"      serializable='false'/>
+    </VertSignalParamsWire>
+    
+    <!-- to use fulcrum balance logic outside of TransitionSignal -->
+    <BalanceParamsWire type="struct" serializable="true" commandable="true">
+        <fulcrumMinVol        type="tw::price::Size"/>
+        <fulcrumRatio         type="float"/>
+        <fulcrumLower         type="float"/>
+        <fulcrumHigher        type="float"/>
+        <fulcrumBarsToPersist type="uint32_t"/>
+        <breakoutMinVol       type="tw::price::Size"/>
+    </BalanceParamsWire>
+    
+    <TransitionSignalParamsWire type="struct" serializable="true" commandable="true">
+        <tCramStopEvalTicks    type="tw::price::Ticks"/>
+        <tCramMaxTicks         type="tw::price::Ticks"/>
+        <tCramFirmPriceQty     type="tw::price::Size"/>
+        <tCramVolGood          type="tw::price::Size"/>
+        <tCramRatio            type="float"/>
+        <atr_required          type="float"/>
+        <tMinRangeTicks        type="tw::price::Ticks"/>
+        <tMaxRangeTicks        type="tw::price::Ticks"/>
+        
+        <tBarLargeDispTicks    type="tw::price::Ticks"/>
+        <tMaxOutsideTicks      type="tw::price::Ticks"/>
+        <tMaxBarsToPersist     type="uint32_t"/>
+        <tReadMinRatio         type="float"/>
+        <tReadMinTraded        type="tw::price::Size"/>
+        <tReadMaxTicks         type="tw::price::Ticks"/>
+        <tTimeToSignal         type="uint32_t"/>
+        <tStopTicks            type="tw::price::Ticks"/>
+        
+        <!-- balancing parameters -->
+        <tFulcrumMinVol        type="tw::price::Size"/>
+        <tFulcrumRatio         type="float"/>
+        <tFulcrumLower         type="float"/>
+        <tFulcrumHigher        type="float"/>
+        <tFulcrumBarsToPersist type="uint32_t"/>
+        <tBreakoutMinVol       type="tw::price::Size"/>
+        
+        <tAllowCloseTrades     type="bool"/>
+        <tFilterTrades         type="bool"/>
+        <tInitialCramMode      type="bool"/>
+        
+        <!-- may not need the transition bar information -->
+        <tFilterCase           type="uint32_t"                             serializable='false'/>
+        <fMap                  type="std::tr1::unordered_map&lt;tw::price::Ticks::type, tw::price::Size&gt;"  serializable='false'/>
+        <fLevel                type="tw::price::Ticks"                     serializable='false'/>
+        <fHigh                 type="tw::price::Ticks"                     serializable='false'/>
+        <fLow                  type="tw::price::Ticks"                     serializable='false'/>
+        <fLevelVol             type="tw::price::Size"                      serializable='false'/>
+        <fHighVol              type="tw::price::Size"                      serializable='false'/>
+        <fLowVol               type="tw::price::Size"                      serializable='false'/>
+        <fRatio                type="float"                                serializable='false'/>
+        <fExtendHighVol        type="tw::price::Size"                      serializable='false'/>
+        <fExtendLowVol         type="tw::price::Size"                      serializable='false'/>
+        <fLocated              type="bool"                                 serializable='false'/>
+        <bLocated              type="bool"                                 serializable='false'/>
+        <tBarIndexfTimedOut    type="uint32_t"                             serializable='false'/>
+        <tBarIndexTimedOut     type="uint32_t"                             serializable='false'/>
+        <delta                 type="int64_t"                              serializable='false'/>
+        <tTimestamp            type="tw::common::THighResTime"             serializable='false'/>
+        <prevSize              type="size_t"                               serializable='false'/>
+        <failSignals           type="std::set&lt;eFailSignalType&gt;"      serializable='false'/>
+        <tSignalTwiceRejected  type="bool"                                 serializable='false'/>
+        <up_T_active           type="bool"                                 serializable='false'/>
+        <down_T_active         type="bool"                                 serializable='false'/>
+        <tBuyAllowed           type="bool"                                 serializable='false'/>
+        <tSellAllowed          type="bool"                                 serializable='false'/>
+        <tReadTradedAbove      type="tw::price::Size"                      serializable='false'/>
+        <tReadTradedBelow      type="tw::price::Size"                      serializable='false'/>
+        <tReadRatio            type="float"                                serializable='false'/>
+        <tDisp                 type="tw::price::Ticks"                     serializable='false'/>
+        <atr                   type="float"                                serializable='false'/>
+        <tBarLocated           type="bool"                                 serializable='false'/>
+        <tBar                  type="tw::common_trade::TBar"               serializable='false'/>
+        <tBarIndex             type="uint32_t"                             serializable='false'/>
+        <tBarIndexPrev         type="uint32_t"                             serializable='false'/>
+        <tSidePrev             type="tw::channel_or::eOrderSide"           serializable='false'/>
+        <tHigh                 type="tw::price::Ticks"                     serializable='false'/>
+        <tLow                  type="tw::price::Ticks"                     serializable='false'/>
+        <tCramCompleted        type="bool"                                 serializable='false'/>
+        <top                   type="tw::price::PriceLevel"                serializable='false'/>
+    </TransitionSignalParamsWire>
+    
+    <TransitionSignalParamsRuntime    type="struct" serializable="true" commandable="true">
+        <tStopPrice            type="tw::price::Ticks"/>
+        <tLimitPrice           type="tw::price::Ticks"/>
+    </TransitionSignalParamsRuntime>
+    
+    <SoldierSignalParamsWire type="struct" serializable="true" commandable="true">
+        <useBackBarCutoffTicks       type="tw::price::Ticks"        desc="disabled if set to '0'"/>
+        <useBackBarPayupTicks        type="tw::price::Ticks"        desc="how much to payup from open of third soldier bar"/>
+        <useBackBarTimeLimit         type="uint32_t"                desc="how many seconds to wait from time of signal to get filled at entry level"/>
+        <minTotalDisplaceTicks       type="tw::price::Ticks"/>
+        <minTicksBetterBar           type="tw::price::Ticks"/>
+        <rejWickToBodyRatio          type="float"/>
+        <rejSmallerBar               type="bool"/>
+        <useBackBarEntryLevel        type="tw::price::Ticks"        serializable='false'/>
+    </SoldierSignalParamsWire>
+    
+    <WickSignalParamsWire    type="struct" serializable="true" commandable="true">        
+        <minWickBarTicks             type="tw::price::Ticks"/>
+        <minPatternTicks             type="tw::price::Ticks"/>
+        <wickToBodyRatio             type="float"/>
+        <wickBarToSwingRatio         type="float"/>
+        <useBodyInWickToBodyRatio    type="bool"/>
+        <wickOutsidePrevHighLow      type="bool"/>
+        <wickBarToPatternDir         type="eWickBarToPatternDir"/>
+        <maxAwayFromCloseTicks       type="tw::price::Ticks"/>
+        <validateSignal              type="bool"/>
+    </WickSignalParamsWire>
+    
+    <CramSignalParamsWire    type="struct" serializable="true" commandable="true">                
+        <minCramBarTicks             type="tw::price::Ticks"/>
+        <cramBarFirmPriceQty         type="tw::price::Size"        desc="disabled if set to '0'"/>
+        <cramPriceDepthPercent       type="float"/>
+        <initialStopTicks            type="tw::price::Ticks"/>
+        <barIndex                    type="uint32_t"            serializable='false'/>
+        <lastSignalBarIndex          type="uint32_t"            serializable='false'/>
+        <cramPrice                   type="tw::price::Ticks"    serializable='false'/>
+    </CramSignalParamsWire>
+    
+    <ORBreakoutSignalParamsWire       type="struct" serializable="true" commandable="true">
+        <orOpenTime                         type="std::string"          desc="indicates start time of strategy"/>
+        <orCloseTime                        type="std::string"          desc="indicates end time of strategy"/>
+        <orInitiateRangeBreakoutTicks       type="tw::price::Ticks"/>
+        <orInitiateRangeBreakoutTicksLimit  type="tw::price::Ticks"/>
+        <orInitialStopBehindRangeTicks      type="tw::price::Ticks"/>
+        <orBreakoutBarsInsideLimit          type="uint32_t"/>
+        <!--
+        <orCloseTooFarToInitiateTicks       type="tw::price::Ticks"/>
+        -->
+        <!-- New breakout logic parameters -->
+        <orMinBarsClosingInside             type="uint32_t"             desc="disabled if set to '0'"/>
+        <orBarsToExit                       type="uint32_t"             desc="disabled if set to '0'"/>
+        <orReqCloseOutsideRangeToInitiate   type="bool"/>
+        <orCloseOutsideRangeBarLength       type="uint32_t"/>
+        <orMinVolRequired                   type="tw::price::Size"      desc="disabled if set to '0'"/>
+        <orMaxRangeTicks                    type="tw::price::Ticks"     desc="disabled if set to '0'"/>
+        <orMinVolOutsideRange               type="tw::price::Size"      desc="disabled if set to '0'"/>
+        <orMinVolRatioFor                   type="float"/>
+        <!-- End of new breakout logic parameters -->
+        <orMaxBreakoutTries                 type="uint32_t"/>
+        <orMaxBarsToBreakout                type="uint32_t"/>
+        <orFirstSlideTrailingStopTicks      type="tw::price::Ticks"/>
+    </ORBreakoutSignalParamsWire>
+    
+     <ORBreakoutSignalParamsRuntime       type="struct" serializable="true" commandable="true">
+         <orOpenTimeMinutesFromMidnight     type="uint32_t"/>
+         <orCloseTimeMinutesFromMidnight    type="uint32_t"/>
+         <orOpenBarIndex                    type="uint32_t"/>
+         <orOpenBarHigh                     type="tw::price::Ticks"/>
+         <orOpenBarLow                      type="tw::price::Ticks"/>
+         <orCountFromBarIndex               type="uint32_t"/>
+         <orCountBarsClosingInside          type="uint32_t"/>
+         <orLastSignalBarIndex              type="uint32_t"/>
+         <orLastSignalExitBarIndex          type="uint32_t"/>
+         <orLastSignalOrderSide             type="tw::channel_or::eOrderSide"/>
+         <orLastProcessedBarIndex           type="uint32_t"/>
+         <orBreakoutTries                   type="uint32_t"/>
+         <orIsSignalOn                      type="uint32_t"/>
+         <orOrderSide                       type="tw::channel_or::eOrderSide"/>
+         <orBreakoutPrice                   type="tw::price::Ticks"/>
+         <orTotalVolInsideRange             type="tw::price::Size"/>
+         <orTotalVolFor                     type="tw::price::Size"/>
+         <orTotalVolAgainst                 type="tw::price::Size"/>
+         <orReason                          type="std::string"/>
+    </ORBreakoutSignalParamsRuntime>
+    
+    <RatioCramParamsWire    type="struct" serializable="true" commandable="true">                
+        <rcInitialTicks             type="tw::price::Ticks"/>
+        <rcVolFor                   type="tw::price::Size"/>
+        <rcRatioFor                 type="float"/>
+        <rcForStopTicks             type="tw::price::Ticks"/>
+        <rcIcebergPrice             type="tw::price::Ticks"         serializable='false'/>
+        <rcTop                      type="tw::price::PriceLevel"    serializable='false'/>
+        <rcReason                   type="std::string"              serializable='false'/>
+    </RatioCramParamsWire>
+    
+    <RatioCramRiskDefenseParamsWire    type="struct" serializable="true" commandable="true">                
+        <rcrdInitialTicks           type="tw::price::Ticks"/>
+        <rcrdVolAgainst             type="tw::price::Size"/>
+        <rcrdRatioAgainst           type="float"/>
+        <rcrdAgainstStopTicks       type="tw::price::Ticks"/>
+        <rcrdTop                    type="tw::price::PriceLevel"    serializable='false'/>
+        <rcrdReason                 type="std::string"              serializable='false'/>
+    </RatioCramRiskDefenseParamsWire>
+    
+    <ContinuationTradeSignalParamsWire    type="struct" serializable="true" commandable="true">
+        <ctMinDispTicks                 type="tw::price::Ticks"/>
+        <ctMinVol                       type="tw::price::Size"/>
+        <ctBodyToBarRatio               type="float"/>
+        <ctMinDispATRMult               type="float"/>
+        <ctCheckSwingHighLow            type="bool"/>
+        <ctReqBarInSwingDir             type="bool"/>
+        <ctReqBarInTrendDir             type="bool"/>
+        <ctReqBarFlatClose              type="bool"/>
+        <ctReqTrendExtreme              type="bool"/>
+        <ctIgnoreCloseVol               type="bool"/>
+        <ctInitiateOnGap                type="bool"/>
+        <ctFlowbackEnabled              type="bool"/>
+        <ctSwingBreakTrendRatio         type="float"/>
+        <ctMaxPayupTicks                type="tw::price::Ticks"/>
+        <ctMaxFlowbackTicks             type="tw::price::Ticks"/>
+        <ctMaxFlowbackStopTicks         type="tw::price::Ticks"/>
+        <ctStopTicks                    type="tw::price::Ticks"/>
+        <ctMinContinuationQtyFor        type="tw::price::Size"/>
+        <ctRatioFor                     type="float"/>
+        <ctConfirmContinuationBarIndex  type="uint32_t"/>
+        <ctAtrRequired                  type="float"                           serializable='false'/>
+    </ContinuationTradeSignalParamsWire>
+    
+    <ContinuationTradeSignalParamsRuntime    type="struct" serializable="true" commandable="true">
+        <ctSignalState               type="eContinuationTradeSignalState"/>
+        <ctFlowbackOccurred          type="bool"/>
+        <ctLastSignalBarIndex        type="uint32_t"/>
+        <ctLastProcessedBarIndex     type="uint32_t"/>
+        <ctMaxPayupPrice             type="tw::price::Ticks"/>   
+        <ctMaxFlowbackPrice          type="tw::price::Ticks"/>   
+        <ctStopPrice                 type="tw::price::Ticks"/>   
+        <ctSide                      type="tw::channel_or::eOrderSide"/>
+        <ctReason                    type="std::string"/>
+    </ContinuationTradeSignalParamsRuntime>
+    
+    <VolumeBreakoutSignalParamsWire    type="struct" serializable="true" commandable="true">        
+        <vbRange                     type="tw::price::Ticks"/>
+        <vbMinVol                    type="tw::price::Size"/>        
+        <vbMinVolRatioFor            type="float"/>
+        <vbTradeDuration             type="uint32_t"/>
+        <vbMaxPos                    type="uint32_t"/>
+    </VolumeBreakoutSignalParamsWire>  
+    
+    <VolumeBreakoutSignalParamsRuntime    type="struct" serializable="true" commandable="true">
+        <vbReason                    type="std::string"/>
+    </VolumeBreakoutSignalParamsRuntime>
+    
+    <IcebergInfo    type="struct" serializable="true" commandable="true">        
+        <price                       type="tw::price::Ticks"/>
+        <maxQty                      type="tw::price::Size"/>
+        <volume                      type="tw::price::Size"/>
+        <side                        type="tw::channel_or::eOrderSide"/>
+    </IcebergInfo>
+    
+    <IcebergDetectorParamsWire    type="struct" serializable="true" commandable="true">
+        <idRatio                     type="float"/>
+        <idMinMaxQty                 type="tw::price::Size"/>
+        <idMinVolume                 type="tw::price::Size"/>
+        <idSlideStopAgainstTicks     type="tw::price::Ticks"/>
+        <idSlideStopForTicks         type="tw::price::Ticks"/>
+        <idResetCountAwayTicks       type="tw::price::Ticks"/>
+        <idIsIcebergDetected         type="bool"                            serializable='false'/>
+        <idIsLastEventTrade          type="bool"                            serializable='false'/>
+        <idCurrIcebergInfo           type="IcebergInfo"                     serializable='false'/>
+        <idReason                    type="std::string"                     serializable='false'/>
+    </IcebergDetectorParamsWire>
+    
+    <MarketActivityParamsWire    type="struct" serializable="true" commandable="true">
+        <maEnabled                   type="bool"/>
+        <maMinDispTicks              type="tw::price::Ticks"/>
+        <maVolToEnter                type="tw::price::Size"/>
+        <maMinVolToEnter             type="tw::price::Size"/>
+        <maVolMultToExit             type="float"/>
+        <maVolMultToExitInterval     type="uint32_t"/>
+        <maAtrRequired               type="float"                           serializable='false'/>
+        <maIsOn                      type="bool"                            serializable='false'/>
+        <maLastProcessedBarIndex     type="uint32_t"                        serializable='false'/>
+        <maLastSignalOnBarIndex      type="uint32_t"                        serializable='false'/>
+        <maReason                    type="std::string"                     serializable='false'/>
+    </MarketActivityParamsWire>
+    
+    <ActivePriceParamsWire  type="struct" serializable="true" commandable="true">
+        <leanQty                     type="tw::price::Size"/>
+        <leanRatio                   type="float"/>
+        <ignoreRatioQty              type="tw::price::Size"/>
+        <leanQtyDelta                type="float"/>
+        <ignoreLeanQtyDelta          type="tw::price::Size"/>
+        <paranoidQty                 type="tw::price::Size"/>
+        <avgParticipantQty           type="tw::price::Size"         desc="disabled if set to '0'"/>
+        <passiveSmallThreshold       type="tw::price::Size"         desc="disabled if set to '0'"/>
+        <leanQtySmall                type="tw::price::Size"/>
+        <quote                       type="tw::price::Quote"    serializable='false'/>
+    </ActivePriceParamsWire>
+    
+    <KeltnerBandInfo  type="struct" serializable="true" commandable="true">
+        <middleValue                 type="float"/>
+        <upperValue                  type="float"/>
+        <lowerValue                  type="float"/>
+        <atr                         type="float"/>
+        <barIndex                    type="uint32_t"/>
+    </KeltnerBandInfo>
+    
+    <KeltnerBandStateInfo  type="struct" serializable="true" commandable="true">
+        <bias                        type="eTradeBias"/>
+        <extremeBarHighLowPrice      type="tw::price::Ticks"/>
+    </KeltnerBandStateInfo>
+    
+     <KeltnerBandProcessorParamsWire  type="struct" serializable="true" commandable="true">
+        <kbMANumOfPeriods            type="uint32_t"/>
+        <kbAtrNumOfPeriods           type="uint32_t"/>
+        <kbAtrMult                   type="float"/>
+        <kbBias                      type="eTradeBias"                                  serializable='false'/>
+        <kbBarPositionToKeltnerBand  type="eBarPositionToKeltnerBand"                   serializable='false'/>
+        <kbReason                    type="std::string"                                 serializable='false'/>
+        <kbInfos                     type="std::vector&lt;KeltnerBandInfo&gt;"          serializable='false'/>
+        <kbProcessdBarIndex          type="uint32_t"                                    serializable='false'/>
+        <kbStateInfos                type="std::vector&lt;KeltnerBandStateInfo&gt;"     serializable='false'/>
+    </KeltnerBandProcessorParamsWire>
+    
+    <ATRPricingParamsWire    type="struct" serializable="true" commandable="true">
+        <atrMultiplierEntry          type="float"/>
+        <atrMultiplierExit           type="float"/>
+        <atrPayUpStyleEntry          type="eATRPricingPayUpStyle"/>
+        <atrPayUpStyleExit           type="eATRPricingPayUpStyle"/>
+        <atrEntryOrderPriceOffset    type="tw::price::Ticks"                serializable='false'/>
+        <atrExitOrderPriceOffset     type="tw::price::Ticks"                serializable='false'/>
+        <atrOrderSide                type="tw::channel_or::eOrderSide"      serializable='false'/>
+    </ATRPricingParamsWire>    
+    
+    <BaseReversalParamsWire    type="struct" serializable="true" commandable="true">
+        <brBarsCountToWork           type="uint32_t"/>
+        <brLastProcessedBarIndex     type="uint32_t"                        serializable='false'/>
+        <brTriggerBarIndex           type="uint32_t"                        serializable='false'/>
+        <brTriggerBarPatternIndex    type="uint32_t"                        serializable='false'/>
+        <brReason                    type="std::string"                     serializable='false'/>
+    </BaseReversalParamsWire>
+    
+    <HookReversalParamsWire    type="struct" serializable="true" commandable="true">
+        <hrEnabled                   type="bool"/>
+        <hrEntryStyle                type="eHookReversalEntryStyle"/>
+        <hrFirstBarMinDispTicks      type="tw::price::Ticks"/>
+        <hrFirstBarBodyToBarRatio    type="float"/>
+        <hrSecondBarBodyToBarRatio   type="float"/>
+        <hrThirdBarRetracePercent    type="float"/>
+        <hrState                     type="eHookReversalState"              serializable='false'/>
+    </HookReversalParamsWire> 
+      
+    <PiercingEngulfingReversalParamsWire    type="struct" serializable="true" commandable="true">
+        <perEnabled                  type="bool"/>
+        <perEntryStyle               type="ePiercingEngulfingReversalEntryStyle"/>
+        <perFirstBarMinDispTicks     type="tw::price::Ticks"/>
+        <perFirstBarBodyToBarRatio   type="float"/>
+        <perSecondBarRetracePercent  type="float"/>
+        <perReqSecondBarLowerOpen    type="bool"/>
+        <perState                    type="ePiercingEngulfingReversalState" serializable='false'/>
+    </PiercingEngulfingReversalParamsWire>
+      
+</Defs>
+
+

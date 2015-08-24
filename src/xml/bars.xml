@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="common_trade">
+    <BarsDefs>
+        <ePatternType   type="enum">
+            <Transitional/>
+            <Hitch/>
+            <Swing/>
+            <Trend/>
+    	</ePatternType>
+        
+        <ePatternDir    type="enum">
+            <Up/>
+            <Down/>
+    	</ePatternDir>
+        
+        <ePatternsType   type="enum">
+            <Simple/>
+            <SwingLevel1/>
+            <SwingLevel2/>
+    	</ePatternsType>
+        
+        <HLOCInfo      type="struct" serializable="true" commandable="true">
+            <index                      type="uint32_t"/>
+            <source                     type="std::string"                  desc="source name, indicating which strategy is the client of bars manager"/>
+            <displayName                type="std::string"                  desc="display name of instrument (e.g. MSFT, ESH3, etc.)"/>
+            <exchange                   type="tw::instr::eExchange"         desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.)"/>            
+            <high                       type="tw::price::Ticks"/>
+            <low                        type="tw::price::Ticks"/>
+            <open                       type="tw::price::Ticks"/>
+            <close                      type="tw::price::Ticks"/>
+            <range                      type="tw::price::Ticks"/>
+            <volume                     type="tw::price::Size"/>
+            <numOfTrades                type="uint32_t"/>
+            <dir                        type="ePatternDir"/>
+            <duration                   type="uint32_t"                     desc="in seconds"/>
+            <open_timestamp             type="tw::common::THighResTime"/>
+            <instrument                 type="tw::instr::InstrumentPtr"                                         serializable='false'/>
+        </HLOCInfo>
+        
+        <BarPattern     type="struct" serializable="true" commandable="true" parent="HLOCInfo">
+            <type                       type="ePatternType"/>
+            <parentType                 type="ePatternsType"/>
+            <firstBarIndex              type="uint32_t"/>
+            <lastBarIndex               type="uint32_t"/>
+            <highBarIndex               type="uint32_t"/>
+            <lowBarIndex                type="uint32_t"/>
+            <simpleHitchMaxBars         type="int32_t"                      desc="value less than 0 disables it, 0 or > 0 enables it"/>
+            <isDirty                    type="bool"                           serializable='false'/>
+            <simpleHitchCount           type="int32_t"                        serializable='false'/>
+            <simpleSwingLastBarIndex    type="int32_t"                        serializable='false'/>
+            <trendSwingIndexes          type="std::vector&lt;uint32_t&gt;"    serializable='false'/>
+            <counterTrendSwingIndexes   type="std::vector&lt;uint32_t&gt;"    serializable='false'/>
+        </BarPattern>
+        
+        <PriceTradesInfo      type="struct" serializable="true" commandable="true">
+            <price                      type="tw::price::Ticks"/>
+            <volBid                     type="tw::price::Size"/>
+            <volAsk                     type="tw::price::Size"/>
+        </PriceTradesInfo>
+        
+        <PriceTradesExtendedInfo      type="struct" serializable="true" commandable="true">
+            <priceBid                   type="tw::price::Ticks"/>
+            <priceAsk                   type="tw::price::Ticks"/>
+            <volBid                     type="tw::price::Size"/>
+            <volAsk                     type="tw::price::Size"/>
+            <timestamp                  type="std::string"/>
+        </PriceTradesExtendedInfo>
+        
+        <!-- NOTE the following structure is used in research for range breakout trade - needs to be moved to it's own xml file later -->
+        <RangeBreakoutTradeInfo      type="struct" serializable="true" commandable="true">
+            <volObserved                type="tw::price::Size"/>
+            <volObservedRatioFor        type="float"/>
+            <isBuy                      type="bool"/>
+            <isOpen                     type="bool"/>
+            <preConfirmedPrice          type="tw::price::Ticks"/>
+            <price                      type="tw::price::Ticks"/>
+            <minPnL                     type="tw::price::Ticks"/>
+            <maxPnL                     type="tw::price::Ticks"/>
+            <endPnL                     type="tw::price::Ticks"/>
+            <minPnLTimestamp            type="tw::common::THighResTime"/>
+            <maxPnLTimestamp            type="tw::common::THighResTime"/>
+            <endTimestamp               type="tw::common::THighResTime"/>
+            <tradeTimestamp             type="tw::common::THighResTime"/>
+            <timeToMinPnL               type="uint32_t"/>
+            <timeToMaxPnL               type="uint32_t"/>
+            <reasonForExit              type="std::string"/>
+            <isConfirmed                type="bool"/>
+            <canTradeNext               type="bool"/>
+            <priceTradesInfos           type="std::deque&lt;PriceTradesInfo&gt;"    serializable='false'/>
+        </RangeBreakoutTradeInfo>
+        
+        <Bar      type="struct" serializable="true" commandable="true" parent="HLOCInfo">
+            <volBid                     type="tw::price::Size"/>
+            <volAsk                     type="tw::price::Size"/>
+            <atrNumOfPeriods            type="uint32_t"/>
+            <atr                        type="double"/>
+            <formed                     type="bool"/>
+            <tradesLog                  type="std::string"  maxlen="2048"/>
+            <trades                     type="std::tr1::unordered_map&lt;tw::price::Ticks::type, PriceTradesInfo&gt;"  serializable='false'/>
+        </Bar>
+        
+        <BarCorr      type="struct" serializable="true" commandable="true" parent="Bar">
+            <lastValidPrice             type="tw::price::Ticks"/>
+        </BarCorr>
+    </BarsDefs>
+    
+    <SQLDefs>
+        <Tables>
+            <Bars timestamp="true">
+                <Fields>
+                    <Bar/>
+                </Fields>
+                <Keys>
+                    <index/>
+                    <source             length="64"/>
+                    <displayName        length="64"/>
+                    <exchange           length="64"/>
+                    <duration/>
+                    <atrNumOfPeriods/>
+                </Keys>
+            </Bars>
+            <BarsPatterns timestamp="true">
+                <Fields>
+                    <BarPattern/>
+                </Fields>
+                <Keys>
+                    <index/>
+                    <source             length="64"/>
+                    <displayName        length="64"/>
+                    <exchange           length="64"/>
+                    <duration/>
+                    <parentType         length="64"/>
+                    <simpleHitchMaxBars/>
+                </Keys>
+            </BarsPatterns>
+        </Tables>
+        <Queries>
+            <Bars_SaveBar>
+                <Type value="REPLACE"/>
+                <Source value="Bars"/>
+                <Params>
+                    <Bar/>
+                </Params>
+            </Bars_SaveBar>
+            <Bars_GetHistory>
+                <Type value="SELECT"/>
+                <Source value="Bars"/>
+                <Filters>
+                    <Filter value="source like '%?%'"/>
+                    <Filter value="displayName = '?'"/>
+                    <Filter value="exchange = '?'"/>
+                    <Filter value="duration = '?'"/>
+                    <Filter value="atrNumOfPeriods = '?'"/>
+                    <Filter value="timestamp >= '?'"/>
+                </Filters>
+                <Params>
+                    <source             type="std::string"/>
+                    <displayName        type="std::string"/>
+                    <exchange           type="std::string"/>
+                    <duration           type="uint32_t"/>
+                    <atrNumOfPeriods    type="uint32_t"/>
+                    <timestamp          type="std::string"/>
+                </Params>
+                <Outputs>
+                    <Bar/>
+                </Outputs>
+            </Bars_GetHistory>            
+            <BarsPatterns_SaveBarPattern>
+                <Type value="REPLACE"/>
+                <Source value="BarsPatterns"/>
+                <Params>
+                    <BarPattern/>
+                </Params>
+            </BarsPatterns_SaveBarPattern>
+        </Queries>
+    </SQLDefs>      
+</Namespace>

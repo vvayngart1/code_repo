@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="instr">
+    <InstrumentsDefs>
+    	<eInstrType 			type="enum">
+    		<Equity/>
+    		<Future/>
+    		<Spread/>
+    	</eInstrType>
+
+    	<eInstrCatg 			type="enum">
+    		<Agricultural/>
+    		<Alt/>
+    		<Currency/>
+    		<Energy/>
+    		<Equity/>
+    		<Financial/>
+    		<Index/>
+    		<InterestRates/>
+    		<Metal/>
+    	</eInstrCatg>
+
+    	<eSettlType                     type="enum">
+    		<Cash/>
+    		<Physical/>
+    	</eSettlType> 
+     
+    	<eCurrency 			type="enum">
+    		<USD/>
+    		<EUR/>
+    		<GBP/>
+    		<JPY/>
+                <AUD/>
+    	</eCurrency>
+        
+        <eExchange 			type="enum">
+    		<CME/>
+    		<ICE/>
+    	</eExchange>
+        
+        <eSubExchange 			type="enum">
+                <CME/>
+    		<CBOT/>
+                <NYMEX/>
+                <CEC/>
+                <KBT/>
+                <MGE/>
+                <DUMX/>
+    		<ICE/>
+    	</eSubExchange>
+        
+        <Fees 		type="struct" serializable="true" addable="true">
+            <feeExLiqAdd        type="double"	 	desc="exchange fee for adding liquidity"/>
+            <feeExLiqRem        type="double"	 	desc="exchange fee for removing liquidity"/>
+            <feeExClearing      type="double"	 	desc="exchange clearing fee"/>
+            <feeBrokerage       type="double"	 	desc="brokerage fee"/>
+            <feePerTrade        type="double"	 	desc="fee per trade (regardless of lot size)"/>
+        </Fees>
+
+    	<SpreadLeg 		type="struct">
+            <index	 	type="uint32_t"	 	desc="leg's index in spread, e.g. for a butterfly spread, leg1 will have index='1', leg2='2' and leg3='3'"  valid_range="&gt;0"/>
+            <ratio      	type="int32_t"	 	desc="leg's ratio in the spread, e.g. '1' means 'buy one lot in a spread's buy of 1 lot', '-2' means 'sell 2 lots in a spread's buy of 1 lot'"  valid_range="!=0"/>
+            <parent 		type="InstrumentPtr"    desc="id of spread instrument from the instrument table below"  valid_range="!=NULL"/>
+            <instrument 	type="InstrumentPtr"    desc="instrument of spread leg from the instrument table below" valid_range="!=NULL"/>
+    	</SpreadLeg>
+
+    	<Instrument 		type="struct" serializable="true" header="true">
+            <keyId              type="uint32_t"         desc="unique id for instrument"/>
+            <instrType          type="eInstrType"       desc="type of instrument (e.g. equity, future, etc.) "/>
+            <category           type="eInstrCatg"       desc="category of instrument (e.g. metal, energy, etc.) "/>
+            <settlType   	type="eSettlType" 	desc="settlement type of instrument (e.g. cash, physical, etc.) "/>
+            <priceCurrency      type="eCurrency"	desc="price's currency (e.g. USD, EUR, etc.) "/>
+
+            <contractSize      	type="double"	        desc="instrument's contract size (e.g. 50 for ES) " valid_range="&gt;0"/>
+            <tickNumerator    	type="uint32_t"	        desc="instrument's tick numerator (e.g. ticksize for is ES 0.25, so numerator = 1)" valid_range="!=0"/>
+            <tickDenominator   	type="uint32_t"	        desc="instrument's tick denominator (e.g. ticksize for is ES 0.25, so denominator = 4)" valid_range="!=0"/>
+
+            <firstTradingDay    type="std::string"      desc="first trading day date(e.g. '2010-09-17') "/>
+            <lastTradingDay     type="std::string"      desc="last trading day date(e.g. '2011-12-16') "/>
+            <expirationDate     type="std::string"      desc="expiration date(e.g. '2011-12-16') "/>
+
+            <symbol           	type="std::string"      desc="technical grouping of instrument on market data (e.g. CL, ES, etc.) "/>
+            <productCode      	type="std::string"      desc="(root) symbol of instrument (e.g. MSFT, ES, etc.) "/>
+            <displayName        type="std::string"      desc="display name of instrument (e.g. ESZ2, etc.) "/>
+            <description      	type="std::string"      desc="description of instrument (e.g. 'crude oil') "/>
+            <exchange          	type="eExchange"        desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) "/>
+            <subexchange        type="eSubExchange"     desc="listing/trading subexchange of instrument (e.g. COMEX, CBOT, etc.) "/>
+            <mdVenue    	type="std::string" 	desc="source of market data for instrument (e.g. CME, SRLabs, etc.) "/>
+            <keyNum1    	type="uint32_t"         desc="exchange's/vendor's specific instrument's integer key1 (e.g. CME's SecurityId"/>
+            <keyNum2    	type="uint32_t"         desc="exchange's/vendor's specific instrument's integer key2 (e.g. vendor's SecurityId"/>
+            <keyStr1    	type="std::string"      desc="exchange's/vendor's specific instrument's string key1"/>
+            <keyStr2    	type="std::string"      desc="exchange's/vendor's specific instrument's string key1"/>
+            <var1               type="std::string"      desc="exchange's/vendor's specific instrument's info var1 (e.g. CME's channelId)"/>
+            <var2               type="std::string"      desc="exchange's/vendor's specific instrument's info var2 (e.g. vendor's security name)"/>
+
+            <displayFormat      type="double"	 	desc="specifies format for displaying the price" valid_range="&gt;=0.0"/>
+            <tickValue          type="double"	    	desc="currency value of tick" valid_range="&gt;=0"/>
+
+            <numberOfLegs   	type="uint32_t"	        desc="number of legs (can be 0 to 4(for now))"  valid_range="&lt;5" additional_validation=" &amp;&amp; ((eInstrType::kSpread==_instrType) ? (_numberOfLegs&gt;1) : true)"/>
+            <displayNameLeg1    type="std::string" 	desc="display name of leg1 instrument (e.g. ESZ2, etc.) "/>
+            <ratioLeg1      	type="int32_t"	 	desc="leg's ratio in the spread, e.g. '1' means 'buy one lot in a spread's buy of 1 lot', '-2' means 'sell 2 lots in a spread's buy of 1 lot'"/>
+            <displayNameLeg2    type="std::string" 	desc="display name of leg2 instrument (e.g. ESZ2, etc.) "/>
+            <ratioLeg2      	type="int32_t"	 	desc="leg's ratio in the spread, e.g. '1' means 'buy one lot in a spread's buy of 1 lot', '-2' means 'sell 2 lots in a spread's buy of 1 lot'"/>
+            <displayNameLeg3    type="std::string" 	desc="display name of leg3 instrument (e.g. ESZ2, etc.) "/>
+            <ratioLeg3      	type="int32_t"	 	desc="leg's ratio in the spread, e.g. '1' means 'buy one lot in a spread's buy of 1 lot', '-2' means 'sell 2 lots in a spread's buy of 1 lot'"/>
+            <displayNameLeg4    type="std::string" 	desc="display name of leg4 instrument (e.g. ESZ2, etc.) "/>
+            <ratioLeg4      	type="int32_t"	 	desc="leg's ratio in the spread, e.g. '1' means 'buy one lot in a spread's buy of 1 lot', '-2' means 'sell 2 lots in a spread's buy of 1 lot'"/>
+            
+            <CFICode            type="std::string"      desc="CFI code from exchange"/>
+            
+            <!-- Non serializable fields should be last!!!! -->
+            <!-- -->
+            <!-- Support/Resistence related fields -->
+            <!-- -->
+            <high               type="tw::price::Ticks" desc="high of the day"                          serializable='false'/>
+            <low                type="tw::price::Ticks" desc="low of the day"                           serializable='false'/>
+            <close              type="tw::price::Ticks" desc="close of the day"                         serializable='false'/>
+            <settlPrice         type="double"           desc="settlement price"                         serializable='false'/>
+            <settlDate          type="std::string"      desc="settlement date (e.g. '2010-09-17')"      serializable='false'/>
+            <PP                 type="double"	 	desc="PP=(H+L+C)/3"                             serializable='false'/>
+            <S1                 type="double"	 	desc="S1=(2*PP)-H"                              serializable='false'/>
+            <R1                 type="double"	 	desc="S1=(2*PP)-L"                              serializable='false'/>
+            <S2                 type="double"	 	desc="S2=PP-(H-L)"                              serializable='false'/>
+            <R2                 type="double"	 	desc="S2=PP+(H-L)"                              serializable='false'/>
+            
+            <!-- Utility fields -->
+            <!-- -->
+            <dirty              type="bool"	 	desc="indicates whether to save instrument"     serializable='false'/>
+            <feeExLiqAdd        type="double"	 	desc="exchange fee for adding liquidity"        serializable='false'/>
+            <feeExLiqRem        type="double"	 	desc="exchange fee for removing liquidity"      serializable='false'/>
+            <feeExClearing      type="double"	 	desc="exchange clearing fee"                    serializable='false'/>
+            <feeBrokerage       type="double"	 	desc="brokerage fee"                            serializable='false'/>
+            <feePerTrade        type="double"	 	desc="fee per trade (regardless of lot size)"   serializable='false'/>
+            <precision          type="int32_t"	 	desc="price's precision"                        serializable='false'/>
+            <legs    		type="std::vector&lt;SpreadLegPtr&gt;"  desc="vector of spread legs"    serializable='false'/>
+            <tc    		type="tw::price::TicksConverterPtr"     desc="ponter to tick converter" serializable='false'/>
+        </Instrument>
+        
+        <Settlement 		type="struct" serializable="true" header="true">
+            <displayName        type="std::string"      desc="display name of instrument (e.g. ESZ2, etc.)"/>
+            <exchange          	type="eExchange"        desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.)"/>
+            <high               type="std::string"      desc="high of the day"/>
+            <low                type="std::string"      desc="low of the day"/>
+            <close              type="std::string"      desc="close of the day"/>
+            <settlPrice         type="std::string"      desc="settlement price"/>
+            <settlDate          type="std::string"      desc="settlement date (e.g. '2010-09-17')"/>
+            <PP                 type="double"           desc="PP=(H+L+C)/3"/>
+            <S1                 type="double"           desc="S1=(2*PP)-H"/>
+            <R1                 type="double"           desc="S1=(2*PP)-L"/>
+            <S2                 type="double"           desc="S2=PP-(H-L)"/>
+            <R2                 type="double"           desc="S2=PP+(H-L)"/>
+        </Settlement>
+        
+        <FeesAndMsgRatiosCME 		type="struct" serializable="true">
+            <symbol           	type="std::string"      desc="(root) symbol of instrument (e.g. ES) "/>
+            <feeEx              type="double"	 	desc="exchange fee"/>            
+            <feeExClearing      type="double"	 	desc="exchange clearing fee"/>
+            <feeBrokerage       type="double"	 	desc="brokerage fee"/>
+            <feePerTrade        type="double"	 	desc="fee per trade (regardless of lot size)"/>
+            <tier1              type="uint32_t"         desc="minumum number of messages for tier1 limits"/>
+            <volumeRatioTier1   type="uint32_t"         desc="benchmark of messages to volume ration for tier1"/>
+            <tier2              type="uint32_t"         desc="minumum number of messages for tier2 limits"/>
+            <volumeRatioTier2   type="uint32_t"         desc="benchmark of messages to volume ration for tier2"/>
+            <tier3              type="uint32_t"         desc="minumum number of messages for tier3 limits"/>
+            <volumeRatioTier3   type="uint32_t"         desc="benchmark of messages to volume ration for tier3"/>
+        </FeesAndMsgRatiosCME>        
+    </InstrumentsDefs>
+    <SQLDefs>
+        <Tables>
+            <Instruments>
+                <Fields>
+                    <Instrument/>
+                </Fields>
+                <PrimaryKeys>
+                    <keyId          auto_increment="true"/>
+                </PrimaryKeys>
+                <Keys>
+                    <displayName    length="64"/>
+                    <exchange       length="64"/>
+                </Keys>
+            </Instruments>
+            <FeesAndMsgRatiosCME>
+                <Fields>
+                    <FeesAndMsgRatiosCME/>
+                </Fields>
+                <Keys>
+                    <symbol         length="64"/>
+                </Keys>
+            </FeesAndMsgRatiosCME>
+            <Settlements>
+                <Fields>
+                    <Settlement/>
+                </Fields>
+                <Keys>
+                    <displayName    length="64"/>
+                    <exchange       length="64"/>
+                    <settlDate      length="64"/>
+                </Keys>
+            </Settlements>
+        </Tables>
+        <Queries>
+            <Instruments_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Instruments"/>
+                <Outputs>
+                    <Instrument/>
+                </Outputs>
+            </Instruments_GetAll>
+            <Instruments_SaveInstrument>
+                <Type value="REPLACE"/>
+                <Source value="Instruments"/>
+                <Params>
+                    <Instrument/>
+                </Params>
+            </Instruments_SaveInstrument>
+            <FeesAndMsgRatiosCME_GetAll>
+                <Type value="SELECT"/>
+                <Source value="FeesAndMsgRatiosCME"/>
+                <Outputs>
+                    <FeesAndMsgRatiosCME/>
+                </Outputs>
+            </FeesAndMsgRatiosCME_GetAll>
+            <Settlements_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Settlements"/>
+                <Filter value="settlDate = '?'"/>
+                <Params>
+                    <settlDate   type="std::string"/>
+                </Params>
+                <Outputs>
+                    <Settlement/>
+                </Outputs>
+            </Settlements_GetAll>
+            <Settlements_SaveInstrument>
+                <Type value="REPLACE"/>
+                <Source value="Settlements"/>
+                <Params>
+                    <Settlement/>
+                </Params>
+            </Settlements_SaveInstrument>
+        </Queries>
+    </SQLDefs>
+</Namespace>

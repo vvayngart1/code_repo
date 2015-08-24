@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="common_trade" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <xi:include href="common_trade_blocks_include.xml"/>
+</Namespace>

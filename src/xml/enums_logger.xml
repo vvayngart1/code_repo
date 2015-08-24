@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="log">
+    <EnumDefs>
+        <eLogLevel 			type="enum">
+            <Info/>
+            <Warn/>
+            <Erro/>
+    	</eLogLevel>       
+    </EnumDefs>
+</Namespace>

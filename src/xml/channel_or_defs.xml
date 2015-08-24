@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="channel_or">
+    <OrdersDefs>
+    	<eOrderState    	type="enum">
+            <Pending/>
+            <Working/>
+            <Modifying/>
+            <Cancelling/>
+            <Cancelled/>
+            <Rejected/>
+            <Filled/>
+    	</eOrderState>
+        
+        <eOrderRespType    	type="enum">
+            <NewAck/>
+            <NewRej/>
+            <ModAck/>
+            <ModRej/>
+            <CxlAck/>
+            <CxlRej/>
+            <PartFill/>
+            <Fill/>
+            <TradeBreak/>
+            <OrderStatus/>
+            <MsgRej/>
+    	</eOrderRespType>
+
+    	<eOrderType 		type="enum">
+            <Market/>
+            <Limit/>
+            <Sim/>
+            <Passive/>
+            <PassiveOffset/>
+            <ModTo/>
+            <ModAway/>
+    	</eOrderType>
+
+    	<eOrderSide             type="enum">
+            <Buy/>
+            <Sell/>
+    	</eOrderSide> 
+     
+    	<eTimeInForce           type="enum">
+            <Day/>
+            <IOC/>
+            <GTC/>
+    	</eTimeInForce>
+        
+        <eRejectType             type="enum">
+            <Internal/>
+            <External/>
+    	</eRejectType>
+        
+        <eRejectSubType             type="enum">
+            <!-- internal rejects -->
+            <!-- -->
+            <ProcessorOrders/>
+            <ProcessorThrottle/>
+            <ProcessorRisk/>
+            <ProcessorPnL/>
+            <ProcessorWTP/>
+            <StrategyContainer/>
+            <!-- TODO: need to implement wtp?
+            <ProcessorWTP/>
+             -->
+            <ProcessorRouter/>
+            <Connection/>
+            <Translator/>
+            
+            <!-- external rejects -->
+            <!-- -->
+            <Exchange/>
+    	</eRejectSubType>
+        
+        <eRejectReason             type="enum">
+            <!-- internal rejects -->
+            <!-- -->
+            
+            <!-- General -->
+            <!-- -->
+            <SystemError/>
+            
+            <!-- ProcessorOrders -->
+            <!-- -->
+            <InvalidOrderState/>
+            <DuplicateOrderId/>
+            
+            <!-- ProcessorRisk -->
+            <!-- -->
+            <AccountNotConfigured/>
+            <AccountDisabled/>
+            <SymbolNotConfigured/>
+            <SymbolDisabled/>
+            <SymbolClipSize/>
+            <SymbolMaxPos/>
+            
+            <!-- ProcessorPnL -->
+            <!-- -->
+            <MaxRealizedDrawdownAccount/>
+            <MaxUnrealizedDrawdownAccount/>
+            <MaxRealizedLossAccount/>
+            <MaxUnrealizedLossAccount/>
+            <MaxTotalLossAccount/>
+            <MaxRealizedDrawdownStrategy/>
+            <MaxUnrealizedDrawdownStrategy/>
+            <MaxRealizedLossStrategy/>
+            <MaxUnrealizedLossStrategy/>
+            
+            <!-- ProcessorThrottle -->
+            <!-- -->
+            <ExceededMaxMPS/>
+            
+            <!-- ProcessorWTP -->
+            <!-- -->
+            <WashTradePrevention/>
+            
+            <!-- Connection -->
+            <!-- -->
+            <ConnectionDown/>
+            
+            <!-- Translator -->
+            <!-- -->
+            <Type/>
+            <Side/>
+            <TimeInForce/>
+            
+            <!-- external rejects -->
+            <!-- -->
+            
+            <!-- Mixed Internal/External rejects -->
+            <!-- -->
+            <TooLateToCancel/>
+            <InvalidOrderSide/>
+            <InvalidOrderPrice/>
+            <SameOrderPrice/>
+            <InvalidOrderQty/>
+            <InvalidOrderSymbol/>
+            <MaxModCounter/>
+            <MaxModRejCounter/>
+            <MaxCxlRejCounter/>
+    	</eRejectReason>
+        
+        <eLiqInd            type="enum">
+            <Add/>
+            <Rem/>
+    	</eLiqInd>
+        
+        <eFillType          type="enum">
+            <Normal/>
+            <Busted/>
+            <External/>
+    	</eFillType>
+        
+        <eFillSubType       type="enum">
+            <Outright/>
+            <Leg/>
+            <SpreadSumm/>
+    	</eFillSubType>
+        
+        <eAlertType         type="enum">
+            <ExchangeUp/>
+            <ExchangeDown/>
+            <ExchangeStatus/>
+            <OrderRej/>
+            <UntrackedOrder/>
+            <UntrackedFill/>
+            <UntrackedBustedFill/>
+            <UnsupportedOrderResp/>
+            <ErrorTranslatingOrderResp/>
+            <ChannelDbMaxQueueSize/>
+            <StuckOrders/>
+            <MaxNewRejCounter/>
+            <MaxModRejCounter/>
+            <MaxCxlRejCounter/>
+            <StratRegimeChange/>
+            <StaleQuotes/>
+            <StratAlert/>
+        </eAlertType>
+        
+        <eDirection       type="enum">
+            <Outbound/>
+            <Inbound/>
+    	</eDirection>
+        
+        <CommandLog      type="struct" serializable="true">
+            <type           type="tw::common::eCommandType"     desc="Command's type"/>
+            <subType        type="tw::common::eCommandSubType"  desc="Command's sub type"/>
+            <ip             type="std::string"                  desc="IP address from which command was send"/>
+            <user           type="std::string"                  desc="Name of a user who send the command"/>
+            <text           type="std::string"                  desc="Serialized command's text"/>
+        </CommandLog>
+        
+        <Reject      type="struct" serializable="true">
+            <rejType        type="eRejectType"      desc="Type of order reject (e.g. internal, external)"/>
+            <rejSubType     type="eRejectSubType"   desc="Sub type of order reject (e.g. ProcessorOrders, ProcessorRisk)"/>
+            <rejReason      type="eRejectReason"    desc="Reason of order reject (e.g. InvalidState, TooLateToCanel)"/>
+            <text           type="std::string"      desc="Text reason of order reject"/>
+        </Reject>
+        
+        <Messaging      type="struct" serializable="true" commandable="true">
+            <newMsgs        type="uint32_t"         desc="new order msgs per base symbol (e.g. NQ)"/>
+            <modMsgs        type="uint32_t"         desc="mod order msgs per base symbol (e.g. NQ)"/>
+            <cxlMsgs        type="uint32_t"         desc="cxl order msgs per base symbol (e.g. NQ)"/>
+            <totalVolume    type="uint32_t"         desc="total volume per base symbol (e.g. NQ)"/>
+        </Messaging>
+        
+        <MessagingForExchange      type="struct" serializable="true" commandable="true" parent="Messaging">
+            <symbol                 type="std::string"              desc="base symbol (e.g. NQ)"/>
+            <exchange               type="tw::instr::eExchange"     desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) of a fill"/>
+            <accountId              type="TAccountId"               desc="Account id of an order"/>            
+            <messaging_YYYYMMDD     type="std::string"              desc="date of messaging stats"/>
+        </MessagingForExchange>
+        
+         <MessagingInternal      type="struct" serializable="true" commandable="true" parent="Messaging">
+            <newMPS         type="uint32_t"         desc="new order msgs per second"/>
+            <modMPS         type="uint32_t"         desc="mod order msgs per second"/>
+            <cxlMPS         type="uint32_t"         desc="cxl order msgs per second"/>
+        </MessagingInternal>
+        
+        <OrderWire      type="struct" serializable="true" commandable="true" parent="MessagingInternal">
+            <!-- Main fields -->
+            <!-- -->
+            <state          type="eOrderState"                      desc="Order's state (e.g. pending, working)"/>   
+            <type           type="eOrderType"                       desc="Order's type (e.g. market, limit)"/>
+            <side           type="eOrderSide"                       desc="Order's side (e.g. buy, sell)"/>
+            <timeInForce    type="eTimeInForce"                     desc="Order's time in force (e.g. day, ioc)"/>
+            <action         type="tw::common::eCommandSubType"      desc="Order's action (e.g. new req, new ack, etc."/>
+            <accountId      type="TAccountId"                       desc="Account id of an order"/>
+            <strategyId     type="TStrategyId"                      desc="Strategy id of an order"/>
+            <instrumentId   type="tw::instr::Instrument::TKeyId"    desc="Instrument id of an order"/>
+            <orderId        type="TOrderId"                         desc="Unique orderId (currently uuid or guid)"/>
+            <qty            type="tw::price::Size"                  desc="Original or working qty of an order"/>
+            <!-- Not allowing to mod size - TODO: if becomes too restrictive, implement -->
+            <!--
+            <newQty         type="tw::price::Size"                  desc="Pending modify qty of an order"/>
+            -->
+            <cumQty         type="tw::price::Size"                  desc="Filled qty"/>
+            <price          type="tw::price::Ticks"                 desc="Original or working price of an order"/>
+            <newPrice       type="tw::price::Ticks"                 desc="Pending modify price of an order"/>
+            <exPrice        type="double"                           desc="order price in exchange format (e.g. double) and not in ticks"/>
+            <exNewPrice     type="double"                           desc="order price in exchange format (e.g. double) and not in ticks"/>
+            <manual         type="bool"                             desc="Specifies if order manual or automated"/>
+            <cancelOnAck    type="bool"                             desc="Specifies if to cancel order on ack recv"/>
+            <stopLoss       type="bool"                             desc="Specifies if to cancel order on ack recv"/>
+            <modCounter     type="uint32_t"                         desc="counter of modify requests without acks"/>
+            <modRejCounter  type="uint32_t"                         desc="counter of modify rejects"/>
+            <cxlRejCounter  type="uint32_t"                         desc="counter of cancel rejects"/>
+        </OrderWire>
+        
+        <OrderWireOrderEntry    type="struct" serializable="true" commandable="true" parent="OrderWire">
+            <!-- Main fields -->
+            <!-- -->
+            <displayName    type="std::string"              desc="display name of order's instrument"/>
+            <exchange       type="std::string"              desc="exchange of order's instrument"/>
+            <exPrice        type="double"                   desc="order price in exchange format (e.g. double) and not in ticks"/>
+        </OrderWireOrderEntry>
+
+    	<Order      type="struct" serializable="true" commandable="true" parent="OrderWire" shared_ptr="true">
+            <!-- Misc Helper fields -->
+            <!-- -->
+            <!-- TODO: need to uncomment once Date and Time classes are implemnted
+            <exTimestamp    type="Timestamp"    desc="first trading date date(e.g. '2010-09-17') "/>
+            -->
+            <exTimestamp    type="tw::common::THighResTime" desc="exchange's timestamp (if any)"/>
+            <trTimestamp    type="tw::common::THighResTime" desc="trigger's timestamp (e.g. quote)"/>
+            <timestamp1     type="tw::common::THighResTime" desc="timestamp1 (e.g. reception from wire)"/>
+            <timestamp2     type="tw::common::THighResTime" desc="timestamp2 (e.g. when parsing starts)"/>
+            <timestamp3     type="tw::common::THighResTime" desc="timestamp3 (e.g. when done with all order handlers)"/>
+            <timestamp4     type="tw::common::THighResTime" desc="timestamp4 (e.g. when done with persistence)"/>
+            
+            <!-- Main fields -->
+            <!-- -->
+            <origClOrderId  type="std::string"              desc="orig client's order id"/>
+            <clOrderId      type="std::string"              desc="curr client's order id"/>
+            <corrClOrderId  type="std::string"              desc="corr client's order id"/>
+            <exOrderId      type="std::string"              desc="exchange's order id"/>
+            <exSessionName  type="std::string"              desc="exchange's session name"/>
+            <stratReason    type="std::string"              desc="reason for placing an order"/>
+            <stratReasonMod type="std::string"              desc="reason for placing modify"/>
+            <stratReasonCxl type="std::string"              desc="reason for placing cancel"/>
+            <memo           type="std::string"              desc="any info strategy can put in"/>
+                                    
+            <!-- Non serializable fields should be last!!!! -->
+            <!-- -->
+            <instrument     type="tw::instr::InstrumentConstPtr"    desc="order's instrument info" serializable='false'/>
+            <client         type="Client"                           desc="order's client" serializable='false'/>
+        </Order>        
+        
+        <OrderSim    type="struct" serializable="true" parent="Order" shared_ptr="true">
+            <!-- Main fields -->
+            <!-- -->
+            <targetCompId   type="std::string"              desc="targetCompId of session to send ack to"/>
+            <internalCxl    type="bool"                     desc="Specifies if cancel was generated internally"/>
+        </OrderSim>
+        
+        <OrderResp      type="struct" serializable="true">
+            <!-- Misc Helper fields -->
+            <!-- -->
+            <!-- TODO: need to uncomment once Date and Time classes are implemnted
+            <exTimestamp    type="Timestamp"    desc="first trading date date(e.g. '2010-09-17') "/>
+            -->
+            <exTimestamp    type="tw::common::THighResTime" desc="exchange's timestamp (if any)"/>
+            <timestamp1     type="tw::common::THighResTime" desc="timestamp1 (e.g. reception from wire)"/>
+            <timestamp2     type="tw::common::THighResTime" desc="timestamp2 (e.g. when parsing starts)"/>
+            <timestamp3     type="tw::common::THighResTime" desc="timestamp3 (e.g. when parsing done)"/>
+
+            <type           type="eOrderRespType"           desc="Order resp's type (e.g. NewAck, NewRej)"/> 
+            <seqNum         type="uint32_t"                 desc="exchange's seq num"/>
+            <lastShares     type="uint32_t"                 desc="fill's qty"/>
+            <lastPrice      type="std::string"              desc="fill's price"/>
+            <price          type="std::string"              desc="order's price"/>
+            <origClOrderId  type="std::string"              desc="orig client's order id"/>
+            <clOrderId      type="std::string"              desc="curr client's order id"/>
+            <corrClOrderId  type="std::string"              desc="corr client's order id"/>
+            <exOrderId      type="std::string"              desc="exchange's order id"/>
+            <exFillId       type="std::string"              desc="exchange's fill id"/>
+            <exFillRefId    type="std::string"              desc="exchange's fill id for trade break"/>
+            <exRejReason    type="std::string"              desc="order's reaject reason"/>
+            <exRejText      type="std::string"              desc="order's reaject reason text"/>
+            <liqInd         type="eLiqInd"                  desc="Indicates if trade added or removed liquidity"/>
+            
+            <!-- Non serializable fields should be last!!!! -->
+            <!-- -->
+            <order          type="TOrderPtr"    desc="orderResp's order (if any)" serializable='false'/>
+        </OrderResp>
+        
+        <FillWire      type="struct" serializable="true" commandable="true" parent="Messaging">
+            <type           type="eFillType"                        desc="Fill's type (e.g. normal, busted)"/> 
+            <subType        type="eFillSubType"                     desc="Fill's sub type (e.g. outright, leg)"/> 
+            <accountId      type="TAccountId"                       desc="Account id of a fill"/>
+            <strategyId     type="TStrategyId"                      desc="Strategy id of a fill"/>
+            <instrumentId   type="tw::instr::Instrument::TKeyId"    desc="Instrument id of a fill"/>
+            <orderId        type="TOrderId"                         desc="Unique orderId (currently uuid or guid) fo a fill"/>
+            <fillId         type="TFillId"                          desc="Unique fillId (currently uuid or guid)"/>
+            <side           type="eOrderSide"                       desc="Fill's side (e.g. buy, sell)"/>
+            <qty            type="tw::price::Size"                  desc="Filled qty of this fill only (and NOT cumulative qty)"/>
+            <posAccount     type="tw::price::Size"                  desc="Cumulative account position"/>
+            <posStrategy    type="tw::price::Size"                  desc="Cumulative strategy position"/>
+            <price          type="tw::price::Ticks"                 desc="Fill's price of an order"/>
+            <exPrice        type="double"                           desc="Fill's price in exchange format (e.g. double) and not in ticks"/>
+            <avgPrice       type="double"                           desc="Average price of open position"/>
+            <liqInd         type="eLiqInd"                          desc="Indicates if trade added or removed liquidity"/>
+            <pickOff        type="bool"                             desc="Specifies if fill was received when order was cancelling"/>
+        </FillWire>
+        
+        <Fill      type="struct" serializable="true" commandable="true" parent="FillWire">
+            <!-- Misc Helper fields -->
+            <!-- -->
+            <!-- TODO: need to uncomment once Date and Time classes are implemnted
+            <exTimestamp    type="Timestamp"    desc="first trading date date(e.g. '2010-09-17') "/>
+            -->
+            <exTimestamp    type="tw::common::THighResTime" desc="exchange's timestamp (if any)"/>
+            <timestamp1     type="tw::common::THighResTime" desc="timestamp1 (e.g. reception from wire)"/>
+            <timestamp2     type="tw::common::THighResTime" desc="timestamp2 (e.g. when parsing starts)"/>
+            <timestamp3     type="tw::common::THighResTime" desc="timestamp3 (e.g. when parsing done)"/>
+            <timestamp4     type="tw::common::THighResTime" desc="timestamp4 (e.g. when done with persistence)"/>
+
+            <!-- Main fields -->
+            <!-- -->
+            <exchangeFillId type="std::string"  desc="exchange's fill id (if any)"/>
+            
+            <!-- Non serializable fields should be last!!!! -->
+            <!-- -->
+            <order          type="TOrderPtr"    desc="fill's order (if any)" serializable='false'/>
+        </Fill>
+        
+        <FillExternal      type="struct" serializable="true" commandable="true">
+            <account        type="std::string"          desc="Account of a fill"/>
+            <strategy       type="std::string"          desc="Strategy of a fill"/>
+            <displayName    type="std::string"          desc="display name of an instrument for a fill"/>
+            <side           type="eOrderSide"           desc="Fill's side (e.g. buy, sell)"/>
+            <qty            type="tw::price::Size"      desc="Filled qty of this fill only (and NOT cumulative qty)"/>            
+            <price          type="double"               desc="Fill's price"/>
+            <liqInd         type="eLiqInd"              desc="Indicates if trade added or removed liquidity"/>
+            <exchangeFillId type="std::string"          desc="exchange's fill id (if any)"/>
+        </FillExternal>
+        
+        <FillSim      type="struct" serializable="true" parent="FillWire">
+            <!-- Non serializable fields should be last!!!! -->
+            <!-- -->
+            <order          type="TOrderSimPtr"    desc="fill's order (if any)" serializable='false'/>
+        </FillSim>
+        
+        <FillDropCopy      type="struct" serializable="true" commandable="true">
+            <accountName    type="std::string"              desc="Internal account name of a fill"/>
+            <type           type="eFillType"                desc="Fill's type (e.g. normal, busted)"/> 
+            <subType        type="eFillSubType"             desc="Fill's sub type (e.g. outright, leg)"/>            
+            <displayName    type="std::string"              desc="display name of instrument (e.g. ESZ2, etc.) of a fill"/>
+            <exchange       type="tw::instr::eExchange"     desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) of a fill"/>
+            <side           type="eOrderSide"               desc="Fill's side (e.g. buy, sell)"/>
+            <qty            type="tw::price::Size"          desc="Filled qty of this fill only (and NOT cumulative qty)"/>
+            <posAccount     type="tw::price::Size"          desc="Cumulative account position"/>
+            <price          type="double"                   desc="Fill's price of an order"/>
+            <origClOrderId  type="std::string"              desc="orig client's order id"/>
+            <clOrderId      type="std::string"              desc="curr client's order id"/>
+            <exOrderId      type="std::string"              desc="exchange's order id"/>
+            <exFillId       type="std::string"              desc="exchange's fill id"/>
+            <exFillRefId    type="std::string"              desc="exchange's fill ref id"/>
+            <liqInd         type="eLiqInd"                  desc="Indicates if trade added or removed liquidity"/>
+            <sourceSession  type="std::string"              desc="iLink session which originated the order for the fill"/>
+            <date           type="std::string"              desc="date of transaction (e.g. 20120503)"/>
+            <exTimestamp    type="std::string"              desc="exchange's timestamp (if any)"/>
+            <recvTimestamp  type="std::string"              desc="reception timestamp (e.g. reception from wire)"/>
+        </FillDropCopy>
+        
+        <PosUpdate  type="struct" serializable="true">
+            <accountId      type="TAccountId"           desc="Account id of a fill"/>
+            <strategyId     type="TStrategyId"          desc="Strategy id of a fill"/>
+            <displayName    type="std::string"          desc="display name of instrument (e.g. ESZ2, etc.) of a pos update"/>
+            <exchange       type="tw::instr::eExchange" desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) of a fill"/>
+            <pos            type="int32_t"              desc="Pos for symbol"/>
+            <avgPrice       type="double"               desc="Average price of open position"/>
+        </PosUpdate>
+        
+        <PosUpdateDropCopy  type="struct" serializable="true" commandable="true">
+            <accountName    type="std::string"          desc="Internal account name of a fill"/>
+            <displayName    type="std::string"          desc="display name of instrument (e.g. ESZ2, etc.) of a pos update"/>
+            <exchange       type="tw::instr::eExchange" desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) of a fill"/>
+            <pos            type="int32_t"              desc="Pos for symbol"/>
+        </PosUpdateDropCopy>
+        
+        <InstrOpenOrdersPos  type="struct" serializable="true">
+            <instrumentId   type="tw::instr::Instrument::TKeyId"    desc="Instrument id"/>
+            <displayName    type="std::string"                      desc="display name of order's instrument"/>
+            <bids           type="tw::price::Size"                  desc="open bids for symbol"/>
+            <asks           type="tw::price::Size"                  desc="open asks for symbol"/>
+            <pos            type="int32_t"                          desc="Pos for symbol"/>
+        </InstrOpenOrdersPos>
+        
+        <AccountInstrOpenOrdersPos  type="struct" serializable="true" parent="InstrOpenOrdersPos">
+            <accountId      type="TAccountId"           desc="Account id"/>
+        </AccountInstrOpenOrdersPos>
+        
+        <StrategyInstrOpenOrdersPos  type="struct" serializable="true" parent="InstrOpenOrdersPos">
+            <strategyId      type="TStrategyId"           desc="Strartegy id"/>
+        </StrategyInstrOpenOrdersPos>
+        
+        <Alert  type="struct" serializable="true" commandable="true">
+            <type           type="eAlertType"       desc="type of alert"/>
+            <strategyId     type="TStrategyId"      desc="Optional strategy id of an alert"/>
+            <text           type="std::string"      desc="text of an alert"/>
+        </Alert>
+        
+        <FixSessionCMEHeader  type="struct" serializable="true">
+            <year           type="uint32_t"         desc="year"/>
+            <week           type="uint32_t"         desc="week number"/>
+            <senderCompID   type="std::string"      desc="senderCompID"/>
+            <targetCompID   type="std::string"      desc="targetCompID"/>
+        </FixSessionCMEHeader>
+        
+        <FixSessionCMEState type="struct" serializable="true" parent="FixSessionCMEHeader">
+            <inSeqNum                   type="uint32_t"             desc="Inbound sequence number"/>
+            <outSeqNum                  type="uint32_t"             desc="Outbound sequence number"/>
+            <sessionCreationTimeStr     type="std::string"          desc="String representation of session creation timestamp"/>
+            <prevState                  type="std::string"          desc="String representation of session previous state"/>
+            <currState                  type="std::string"          desc="String representation of session current state"/>
+        </FixSessionCMEState>
+        
+        <FixSessionCMEMsg type="struct" serializable="true" parent="FixSessionCMEHeader">
+            <direction      type="eDirection"       desc="type of alert"/>
+            <seqNum         type="uint32_t"         desc="sequence number" />
+            <message        type="std::string"      desc="fix message"/>
+        </FixSessionCMEMsg>
+        
+        <FixSessionCMEMsgForAudit type="struct" serializable="true" parent="FixSessionCMEMsg">
+            <index         type="uint32_t"         desc="sequence number" />
+            <timestamp     type="std::string"      desc="timestamp of logging" />
+        </FixSessionCMEMsgForAudit>
+        
+        <PnLAuditTrailInfo      type="struct" serializable="true" commandable="true">
+            <!-- Header fields -->
+            <!-- -->
+            <accountId                  type="TAccountId"/>            
+            <strategyId                 type="TStrategyId"/>
+            
+            <!-- NOTE: right now hardcoded to max of 2 symbols -->
+            <!-- -->
+            
+            <!-- Symbol1 fields -->
+            <!-- -->
+            <displayName1               type="std::string"/>
+            <pos1                       type="tw::price::Size"/>
+            <maxInTicks1                type="double"/>
+            <minInTicks1                type="double"/>
+            <unrealizedInTicks1         type="double"/>
+            <realizedInDollars1         type="double"/>
+            
+            <!-- Symbol2 fields -->
+            <!-- -->
+            <displayName2               type="std::string"/>
+            <pos2                       type="tw::price::Size"/>
+            <maxInTicks2                type="double"/>
+            <minInTicks2                type="double"/>
+            <unrealizedInTicks2         type="double"/>
+            <realizedInDollars2         type="double"/>
+            
+            <!-- Parent fields -->
+            <!-- -->
+            <parentType                 type="std::string"/>
+            <posLong                    type="tw::price::Size"/>
+            <posShort                   type="tw::price::Size"/>
+            <maxInDollars               type="double"/>
+            <minInDollars               type="double"/>
+            <unrealizedInDollars        type="double"/>
+            <realizedInDollars          type="double"/>
+            
+            <eventTimestamp             type="tw::common::THighResTime"/>
+            
+            <!-- Bookeeping fields -->
+            <!-- -->
+            <peakRealizedInDollars      type="double"                   serializable='false'/>
+            <avgPriceInTicks1           type="double"                   serializable='false'/>
+            <avgPriceInTicks2           type="double"                   serializable='false'/>
+            <instrument1                type="tw::instr::InstrumentPtr" serializable='false'/>
+            <instrument2                type="tw::instr::InstrumentPtr" serializable='false'/>
+        </PnLAuditTrailInfo>
+        
+        <PnLAuditStatsInfo      type="struct" serializable="true" commandable="true">
+            <timestamp1                 type="tw::common::THighResTime"/>
+            <timestamp2                 type="tw::common::THighResTime"/>
+            <entrySide1                 type="eOrderSide"/>
+            <entrySide2                 type="eOrderSide"/>
+            <netTicks1                  type="double"/>
+            <netTicks2                  type="double"/>
+            <netPnL                     type="double"/>
+            <maxUnRPnL1                 type="double"/>
+            <minUnRPnL1                 type="double"/>
+            <maxUnRPnL2                 type="double"/>
+            <minUnRPnL2                 type="double"/>
+            <maxUnRPnLTotal             type="double"/>
+            <minUnRPnLTotal             type="double"/>
+        </PnLAuditStatsInfo>
+        
+        <PnLAuditStratStatsInfo      type="struct" serializable="true" commandable="true">
+            <accountId                  type="TAccountId"/>            
+            <strategyId                 type="TStrategyId"/>
+            <pos1                       type="tw::price::Size"/>
+            <pos2                       type="tw::price::Size"/>
+            <prevPnL1                   type="double"/>
+            <prevPnL2                   type="double"/>
+            <prevPnLTotal               type="double"/>
+            <instrument1                type="tw::instr::InstrumentPtr"             serializable='false'/>
+            <instrument2                type="tw::instr::InstrumentPtr"             serializable='false'/>
+            <statsInfos                 type="std::vector&lt;PnLAuditStatsInfo&gt;" serializable='false'/>
+        </PnLAuditStratStatsInfo>
+        
+        <SimulatorMatcherParams  type="struct" serializable="true">
+            <percentCancelFront     type="uint32_t"/>
+            <verbose                type="bool"/>
+            <ack_delay_ms           type="uint32_t"/>
+            <rej_as_bussiness_rej   type="bool"/>
+            <new_ack_seq_count      type="int32_t"/>
+            <new_rej_seq_count      type="int32_t"/>
+            <mod_ack_seq_count      type="int32_t"/>
+            <mod_rej_seq_count      type="int32_t"/>
+            <cxl_ack_seq_count      type="int32_t"/>
+            <cxl_rej_seq_count      type="int32_t"/>
+            <new_ack_seq_counter    type="int32_t"/>
+            <new_rej_seq_counter    type="int32_t"/>
+            <mod_ack_seq_counter    type="int32_t"/>
+            <mod_rej_seq_counter    type="int32_t"/>
+            <cxl_ack_seq_counter    type="int32_t"/>
+            <cxl_rej_seq_counter    type="int32_t"/>
+        </SimulatorMatcherParams>
+        
+        <ChannelOrStorageStatsEntered  type="struct" serializable="true" header="true">
+            <counterCommands                type="int32_t"      desc="number of commands entered"/>
+            <counterOrders                  type="int32_t"      desc="number of orders entered"/>
+            <counterFills                   type="int32_t"      desc="number of fills entered"/>
+            <counterFixSessionCMEStates     type="int32_t"      desc="number of fixSessionCMEStates entered"/>
+            <counterFixSessionCMEMsgs       type="int32_t"      desc="number of fixSessionCMEMsgs entered"/>
+            <counterFillsDropCopy           type="int32_t"      desc="number of fills for drop copy entered"/>
+            <counterPnLAuditTrailInfos      type="int32_t"      desc="number of PnLAuditTrailInfos entered"/>
+        </ChannelOrStorageStatsEntered>
+        
+        <ChannelOrStorageStatsPersisted  type="struct" serializable="true" header="true" parent="ChannelOrStorageStatsEntered">
+            <counterOrdersTransactions      type="int32_t"      desc="number of orders persisted"/>
+            <counterPosUpdates              type="int32_t"      desc="number of posUpdates persisted"/>
+        </ChannelOrStorageStatsPersisted>
+        
+        <AuditCme  type="struct" serializable="true" header="true">
+            <serverTransactionNumber    type="std::string"/>
+            <serverTimestamp            type="std::string"/>
+            <senderLocationID           type="std::string"/>
+            <manualOrderIdentifier      type="std::string"/>
+            <exchangeCode               type="std::string"/>
+            <messageDirection           type="std::string"/>
+            <status                     type="std::string"/>
+            <reasonCode                 type="std::string"/>
+            <tag50                      type="std::string"/>
+            <accountNumber              type="std::string"/>
+            <executingFirmNumber        type="std::string"/>
+            <sessionID                  type="std::string"/>
+            <clientOrderID              type="std::string"/>
+            <correlationClOrdID         type="std::string"/>
+            <hostOrderNumber            type="std::string"/>
+            <messageType                type="std::string"/>
+            <orderStatus                type="std::string"/>
+            <buyOrSellIndicator         type="std::string"/>
+            <orderQty                   type="std::string"/>
+            <lastShares                 type="std::string"/>
+            <maxShow                    type="std::string"/>
+            <securityDesc               type="std::string"/>
+            <symbol                     type="std::string"/>
+            <strikePrice                type="std::string"/>
+            <limitPrice                 type="std::string"/>
+            <stopPrice                  type="std::string"/>
+            <fillPrice                  type="std::string"/>
+            <orderType                  type="std::string"/>
+            <orderQualifier             type="std::string"/>
+            <customerTypeIndicator      type="std::string"/>
+            <origin                     type="std::string"/>
+            <giveUpFirm                 type="std::string"/>
+            <giveUpIndicator            type="std::string"/>
+            <allocAccount               type="std::string"/>
+            <CFICode                    type="std::string"/>
+            <maturityDate               type="std::string"/>
+        </AuditCme>
+        
+        <BlotterEntry   type="struct" serializable="true" header="true">
+            <orderId        type="std::string"/>
+            <side           type="eOrderSide"/>
+            <price          type="tw::price::Ticks"/>
+            <qty            type="tw::price::Size"/>
+            <liqInd         type="eLiqInd"/>
+            <pickOff        type="bool"/>
+            <strategyId     type="TStrategyId"/>
+            <stratReason    type="std::string"/>
+            <pos            type="tw::price::Size"/>
+            <timestamp      type="tw::common::THighResTime"/>
+        </BlotterEntry>
+        
+        <BlotterRowTotals   type="struct" serializable="true" header="true">
+            <openingSide                type="eOrderSide"/>
+            <isClosed                   type="bool"/>
+            <pnl                        type="double"/>
+            <pnlWithFees                type="double"/>
+            <pnlRunningTotals           type="double"/>
+            <pnlWithFeesRunningTotals   type="double"/>
+            <holdingTime                type="std::string"/>
+        </BlotterRowTotals>
+        
+        <OrderCmeBridgeInfo      type="struct" serializable="true" commandable="true" parent="MessagingInternal">
+            <!-- Main fields -->
+            <!-- -->
+            <side                       type="std::string"/>
+            <symbol                     type="std::string"/>
+            <securityDesc               type="std::string"/>
+            <manualOrderIndicator       type="std::string"/>
+            <correlationClOrdID         type="std::string"/>
+            <origClOrdID                type="std::string"/>
+            <correlationClOrdID_bridge  type="std::string"/>
+            <origClOrdID_bridge         type="std::string"/>
+            <orderID                    type="std::string"/>
+            
+            <orderIds                   type="std::map&lt;std::string, std::string&gt;" serializable='false'/>
+        </OrderCmeBridgeInfo>
+        
+        <Client type="callbacks">
+            <onNewAck           return_type="void"  args_num="1"    args="const TOrderPtr&amp;"                     args_names="order"      args_full="const TOrderPtr&amp; order"/>
+            <onNewRej           return_type="void"  args_num="2"    args="const TOrderPtr&amp;, const Reject&amp;"  args_names="order, rej" args_full="const TOrderPtr&amp; order, const Reject&amp; rej"/>
+            <onModAck           return_type="void"  args_num="1"    args="const TOrderPtr&amp;"                     args_names="order"      args_full="const TOrderPtr&amp; order"/>
+            <onModRej           return_type="void"  args_num="2"    args="const TOrderPtr&amp;, const Reject&amp;"  args_names="order, rej" args_full="const TOrderPtr&amp; order, const Reject&amp; rej"/>
+            <onCxlAck           return_type="void"  args_num="1"    args="const TOrderPtr&amp;"                     args_names="order"      args_full="const TOrderPtr&amp; order"/>
+            <onCxlRej           return_type="void"  args_num="2"    args="const TOrderPtr&amp;, const Reject&amp;"  args_names="order, rej" args_full="const TOrderPtr&amp; order, const Reject&amp; rej"/>
+            <onFill             return_type="void"  args_num="1"    args="const Fill&amp;"                          args_names="fill"       args_full="const Fill&amp; fill"/>
+            <onAlert            return_type="void"  args_num="1"    args="const Alert&amp;"                         args_names="alert"      args_full="const Alert&amp; alert"/>
+            <onRebuildOrderRej  return_type="void"  args_num="2"    args="const TOrderPtr&amp;, const Reject&amp;"  args_names="order, rej" args_full="const TOrderPtr&amp; order, const Reject&amp; rej"/>
+        </Client>        
+    </OrdersDefs>
+    
+    <SQLDefs>
+        <Tables>
+            <CommandsLog>
+                <Fields>
+                    <CommandLog/>
+                </Fields>
+            </CommandsLog>
+            <PnLAuditTrail>
+                <Fields>
+                    <PnLAuditTrailInfo/>
+                </Fields>
+            </PnLAuditTrail>
+            <Orders>
+                <Fields>
+                    <Order/>
+                    <Reject/>
+                </Fields>
+                <Keys>
+                    <orderId        length="64"/>
+                </Keys>
+            </Orders>
+            <OrdersTransactions>
+                <Fields>
+                    <Order/>
+                    <Reject/>
+                </Fields>
+            </OrdersTransactions>
+            <Fills>
+                <Fields>
+                    <Fill/>
+                </Fields>
+                <Keys>
+                    <fillId         length="64"/>
+                </Keys>
+                <Required>
+                    <avgPrice/>
+                </Required>
+            </Fills>
+            <FillsDropCopy>
+                <Fields>
+                    <FillDropCopy/>
+                </Fields>
+                <Keys>
+                    <displayName    length="64"/>
+                    <sourceSession  length="64"/>
+                    <date           length="64"/>
+                    <exFillId       length="64"/>
+                </Keys>                
+            </FillsDropCopy>
+            <Positions>
+                <Fields>
+                    <PosUpdate/>
+                </Fields>
+                <Keys>
+                    <accountId      length="64"/>
+                    <strategyId     length="64"/>
+                    <displayName    length="64"/>
+                    <exchange       length="64"/>
+                </Keys>
+                <Required>
+                    <avgPrice/>
+                </Required>
+            </Positions>
+            <PositionsDropCopy>
+                <Fields>
+                    <PosUpdateDropCopy/>
+                </Fields>
+                <Keys>
+                    <accountName    length="64"/>
+                    <displayName    length="64"/>
+                    <exchange       length="64"/>
+                </Keys>
+            </PositionsDropCopy>
+            <FixSessionCMEStates>
+                <Fields>
+                    <FixSessionCMEState/>
+                </Fields>
+                <Keys>
+                    <senderCompID   length="64"/>
+                    <targetCompID   length="64"/>
+                </Keys>
+            </FixSessionCMEStates>
+            <FixSessionCMEMsgs>
+                <Fields>
+                    <FixSessionCMEMsg>
+                        <seqNum     type="INT"/>
+                        <message    type="TEXT"/>
+                    </FixSessionCMEMsg>
+                </Fields>
+            </FixSessionCMEMsgs>
+            <MessagingForExchanges>
+                <Fields>
+                    <MessagingForExchange/>
+                </Fields>
+                <Keys>
+                    <symbol         length="64"/>
+                    <exchange       length="64"/>
+                    <accountId      length="64"/>
+                </Keys>
+            </MessagingForExchanges>
+        </Tables>
+        <Queries>
+            <CommandsLog_SaveCommandLog>
+                <Type value="INSERT"/>
+                <Source value="CommandsLog"/>
+                <Params>
+                    <CommandLog/>
+                </Params>
+            </CommandsLog_SaveCommandLog>
+            <PnLAuditTrail_SavePnLAuditTrail>
+                <Type value="INSERT"/>
+                <Source value="PnLAuditTrail"/>
+                <Params>
+                    <PnLAuditTrailInfo/>
+                </Params>
+            </PnLAuditTrail_SavePnLAuditTrail>
+            <PnLAuditTrail_GetAllForDate>
+                <Type value="SELECT"/>
+                <Source value="PnLAuditTrail"/>
+                <Filter value="accountId = '?' AND timestamp &gt;= '?' AND timestamp &lt;= '?'"/>
+                <Params>
+                    <account  type="std::string"/>
+                    <start_time  type="std::string"/>
+                    <end_time  type="std::string"/>
+                </Params>
+                <Outputs>
+                    <PnLAuditTrailInfo/>
+                </Outputs>
+            </PnLAuditTrail_GetAllForDate>
+            <Orders_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Orders"/>
+                <Outputs>
+                    <Order/>
+                </Outputs>
+            </Orders_GetAll>
+            <Orders_GetAllForDate>
+                <Type value="SELECT"/>
+                <Source value="Orders"/>
+                <Filter value="timestamp like '?%'"/>
+                <Params>
+                    <timestamp  type="std::string"/>
+                </Params>
+                <Outputs>
+                    <Order/>
+                </Outputs>
+            </Orders_GetAllForDate>
+            <Orders_GetAllOpen>
+                <Type value="SELECT"/>
+                <Source value="Orders"/>
+                <Filter value="state NOT IN ('Cancelled', 'Rejected', 'Filled')"/>
+                <Outputs>
+                    <Order/>
+                </Outputs>
+            </Orders_GetAllOpen>
+            <Orders_SaveOrderTransaction>
+                <Type value="INSERT"/>
+                <Source value="OrdersTransactions"/>
+                <Params>
+                    <Order/>
+                    <Reject/>
+                </Params>
+            </Orders_SaveOrderTransaction>
+            <Orders_SaveOrder>
+                <Type value="REPLACE"/>
+                <Source value="Orders"/>
+                <Params>
+                    <Order/>
+                    <Reject/>
+                </Params>
+            </Orders_SaveOrder>
+            <Fills_SaveFill>
+                <Type value="REPLACE"/>
+                <Source value="Fills"/>
+                <Params>
+                    <Fill/>
+                </Params>
+            </Fills_SaveFill>
+            <Fills_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Fills"/>
+                <Outputs>
+                    <Fill/>
+                </Outputs>
+            </Fills_GetAll>
+            <Fills_GetAllForDate>
+                <Type value="SELECT"/>
+                <Source value="Fills"/>
+                <Filter value="timestamp like '?%'"/>
+                <Params>
+                    <timestamp  type="std::string"/>
+                </Params>
+                <Outputs>
+                    <Fill/>
+                </Outputs>
+            </Fills_GetAllForDate>
+            <FillsDropCopy_SaveFill>
+                <Type value="REPLACE"/>
+                <Source value="FillsDropCopy"/>
+                <Params>
+                    <FillDropCopy/>
+                </Params>
+            </FillsDropCopy_SaveFill>
+            <Positions_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Positions"/>
+                <Outputs>
+                    <PosUpdate/>
+                </Outputs>
+            </Positions_GetAll>
+            <Positions_SavePosUpdate>
+                <Type value="INSERT"/>
+                <UpdateStatement value="ON DUPLICATE KEY UPDATE pos=pos+VALUES(pos), avgPrice=VALUES(avgPrice)"/>
+                <Source value="Positions"/>
+                <Params>
+                    <PosUpdate/>
+                </Params>
+            </Positions_SavePosUpdate>
+            <PositionsDropCopy_GetAll>
+                <Type value="SELECT"/>
+                <Source value="PositionsDropCopy"/>
+                <Outputs>
+                    <PosUpdateDropCopy/>
+                </Outputs>
+            </PositionsDropCopy_GetAll>
+            <PositionsDropCopy_SavePosUpdate>
+                <Type value="INSERT"/>
+                <UpdateStatement value="ON DUPLICATE KEY UPDATE pos=pos+VALUES(pos)"/>
+                <Source value="PositionsDropCopy"/>
+                <Params>
+                    <PosUpdateDropCopy/>
+                </Params>
+            </PositionsDropCopy_SavePosUpdate>
+            <FixSessionCMEStates_GetAll>
+                <Type value="SELECT"/>
+                <Source value="FixSessionCMEStates"/>
+                <Outputs>
+                    <FixSessionCMEState/>
+                </Outputs>
+            </FixSessionCMEStates_GetAll>
+            <FixSessionCMEStates_SaveState>
+                <Type value="REPLACE"/>
+                <Source value="FixSessionCMEStates"/>
+                <Params>
+                    <FixSessionCMEState/>
+                </Params>
+            </FixSessionCMEStates_SaveState>
+            <FixSessionCMEMsgs_SaveMsg>
+                <Type value="INSERT"/>
+                <Source value="FixSessionCMEMsgs"/>
+                <Params>
+                    <FixSessionCMEMsg/>
+                </Params>
+            </FixSessionCMEMsgs_SaveMsg>
+            <FixSessionCMEMsgs_GetAll>
+                <Type value="SELECT"/>
+                <Source value="FixSessionCMEMsgs"/>
+                <Outputs>
+                    <FixSessionCMEMsgForAudit/>
+                </Outputs>
+            </FixSessionCMEMsgs_GetAll>
+            <MessagingForExchanges_Save>
+                <Type value="REPLACE"/>
+                <Source value="MessagingForExchanges"/>
+                <Params>
+                    <MessagingForExchange/>
+                </Params>
+            </MessagingForExchanges_Save>
+            <MessagingForExchanges_GetAll>
+                <Type value="SELECT"/>
+                <Source value="MessagingForExchanges"/>
+                <Filter value="messaging_YYYYMMDD=CURDATE()"/>
+                <Outputs>
+                    <MessagingForExchange/>
+                </Outputs>
+            </MessagingForExchanges_GetAll>
+        </Queries>
+    </SQLDefs>    
+</Namespace>

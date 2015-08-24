@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="common">
+    <EnumDefs>
+    	<eCommandType 			type="enum">
+            <ChannelPf/>
+            <ChannelOr/>
+            <ChannelOrCme/>
+            <ChannelOrStorage/>
+            <ExchangeSim/>
+            <Strat/>
+            <ProcessorPnL/>
+            <ProcessorOrders/>
+            <ProcessorRisk/>
+            <ChannelOrDropCme/>
+            <InstrumentLoader/>
+            <QuoteStore/>
+    	</eCommandType>
+        
+        <eCommandSubType 		type="enum">
+            <Logon/>
+            <Logout/>
+            <TestRequest/>
+            <SeqReset/>
+            <ExtFill/>
+            <OrNew/>
+            <OrMod/>
+            <OrCxl/>
+            <OrNewAck/>
+            <OrNewRej/>
+            <OrModAck/>
+            <OrModRej/>
+            <OrCxlAck/>
+            <OrCxlRej/>
+            <OrFill/>
+            <List/>
+            <Status/>
+            <OpenOrders/>
+            <Sub/>
+            <Unsub/>
+            <Alert/>
+            <Params/>
+            <FillDropCopy/>
+            <PosUpdateDropCopy/>
+            <UpdateAccount/>
+            <UpdateAccountInstrument/>
+            <Settlement/>
+    	</eCommandSubType>        
+            
+        <eChannelOrStorageItemType      type="enum">
+            <Command/>
+            <Order/>
+            <OrderAndRej/>
+            <Fill/>
+            <FixSessionCMEState/>
+            <FixSessionCMEMsg/>
+            <FillDropCopy/>
+            <PnLAuditTrailInfo/>
+        </eChannelOrStorageItemType>
+        
+        <eChannelOrCMEStorageType       type="enum">
+            <Native/>
+            <Custom/>
+        </eChannelOrCMEStorageType>
+        
+        <eBarsStorageItemType      type="enum">
+            <Bar/>
+            <BarPattern/>
+        </eBarsStorageItemType>
+        
+        <eCMEOrBridgeMsgType      type="enum">
+            <ExRpt/>
+            <OrderCxlRej/>
+            <Rej/>
+            <BusRej/>
+            <Heartbeat/>
+            <Logout/>
+        </eCMEOrBridgeMsgType>
+        
+    </EnumDefs>
+</Namespace>

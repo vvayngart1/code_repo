@@ -1,0 +1,51 @@
+/*
+ * Onix available callbacks. For now,
+ * will use DirectBookUpdateListener for book
+ * updates - might need to rethink later.
+ * Other callbacks implemented are indended
+ * 
+ * 
+SecurityDefinitionListener,
+        OnixS::CME::MarketData::SecurityDefinitionListener, 
+        // OnixS::CME::MarketData::SecurityDefinitionListener interface
+        //
+        virtual void onSecurityDefinition(const OnixS::CME::MarketData::SecurityDefinition& secDef, const OnixS::CME::MarketData::ChannelId& channelId);
+        virtual void onSecurityDefinitionDeleted(OnixS::CME::MarketData::SecurityId secId, const OnixS::CME::MarketData::ChannelId& channelId);
+
+        virtual void onSecurityDefinitionsRecoveryStarted(const OnixS::CME::MarketData::ChannelId& channelId);
+        virtual void onSecurityDefinitionsRecoveryFinished(const OnixS::CME::MarketData::ChannelId& channelId);
+
+        // OnixS::CME::MarketData::SecurityDefinitionListener interface
+        //
+        void ChannelImplOnix::onSecurityDefinition(const OnixS::CME::MarketData::SecurityDefinition& secDef,
+                                                   const OnixS::CME::MarketData::ChannelId& channelId) {
+
+        }
+
+        void ChannelImplOnix::onSecurityDefinitionDeleted(OnixS::CME::MarketData::SecurityId secId,
+                                                          const OnixS::CME::MarketData::ChannelId& channelId) {
+
+        }
+
+        void ChannelImplOnix::onSecurityDefinitionsRecoveryStarted(const OnixS::CME::MarketData::ChannelId& channelId) {
+
+        }
+
+        void ChannelImplOnix::onSecurityDefinitionsRecoveryFinished(const OnixS::CME::MarketData::ChannelId& channelId) {
+
+        }
+DirectBookChangeListener, 
+        DirectBookUpdateListener, 
+ImpliedBookChangeListener, 
+ImpliedBookUpdateListener, 
+ConsolidatedBookUpdateListener, 
+        TradeListener,
+        NewsListener, 
+        SecurityStatusListener, 
+        StatisticsListener, 
+        MessageProcessingListener, 
+        HandlerStateChangeListener, 
+        ReplayListener, 
+        WarningListener,
+        ErrorListener
+*/

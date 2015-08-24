@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Namespace name="risk">
+    <RiskDefs>                        
+        <Account        type="struct" serializable="true" commandable="true">
+            <id                     type="TAccountId"           desc="account's id"/>
+            <name                   type="std::string"          desc="account's name"/>
+            <maxMPSNew              type="uint32_t"             desc="max msgs per second (MPS) for new orders"/>
+            <maxMPSMod              type="uint32_t"             desc="max msgs per second (MPS) for modifies"/>
+            <maxMPSCxl              type="uint32_t"             desc="max msgs per second (MPS) for cancels"/>
+            <maxRealizedDrawdown    type="double"               desc="max drawdown for realized pnl for account"/>
+            <maxUnrealizedDrawdown  type="double"               desc="max drawdown for unrealized pnl for account"/>
+            <maxRealizedLoss        type="double"               desc="max loss for the day for realized pnl for account"/>
+            <maxUnrealizedLoss      type="double"               desc="max loss for the day for unrealized pnl for account"/>
+            <maxTotalLoss           type="double"               desc="max total loss for the day (realized pnl + unrealized pnl) for account"/>
+            <tradeEnabled           type="bool"                 desc="indicates if account is tradable"/>
+        </Account>
+        
+        <Strategy       type="struct" serializable="true">
+            <id                     type="TStrategyId"          desc="strategy's id"/>
+            <name                   type="std::string"          desc="strategy's name"/>
+            <accountId              type="TAccountId"           desc="account's id"/>
+            <maxRealizedDrawdown    type="double"               desc="max drawdown for realized pnl for strategy"/>
+            <maxUnrealizedDrawdown  type="double"               desc="max drawdown for unrealized pnl for strategy"/>
+            <maxRealizedLoss        type="double"               desc="max loss for the day for realized pnl for strategy"/>
+            <maxUnrealizedLoss      type="double"               desc="max loss for the day for unrealized pnl for strategy"/>
+            <lastStarted            type="std::string"          desc="strategy's last started timestamp"/> 
+            <tradeEnabled           type="bool"                 desc="indicates if strategy is tradable"/>
+        </Strategy>
+        
+        <AccountRiskParams type="struct" serializable="true" commandable="true" >
+            <accountId      type="TAccountId"           desc="account id of a fill"/>            
+            <displayName    type="std::string"          desc="display name of instrument (e.g. ESZ2, etc.) of a fill"/>
+            <exchange       type="tw::instr::eExchange" desc="listing/trading exchange of instrument (e.g. NYSE, CME, etc.) of a fill"/>
+            <clipSize       type="uint32_t"             desc="max order size for symbol"/>
+            <maxPos         type="uint32_t"             desc="Pos for symbol"/>
+            <tradeEnabled   type="bool"                 desc="indicates if account's is tradable"/>            
+        </AccountRiskParams>
+        
+        <ThrottleCounters        type="struct" serializable="true">            
+            <counterMPSNew      type="uint32_t"         desc="count of msgs per second (MPS) for new orders"/>
+            <counterMPSMod      type="uint32_t"         desc="count of msgs per second (MPS) for modifies"/>
+            <counterMPSCxl      type="uint32_t"         desc="count of msgs per second (MPS) for cancels"/>            
+        </ThrottleCounters>
+        
+        <PnL        type="struct" serializable="true" addable="true">
+            <unrealizedPnL              type="double"           desc="unrealized pnl"/>
+            <realizedPnL                type="double"           desc="realized pnl"/>            
+            <maxUnrealizedPnL           type="double"           desc="max unrealized pnl"/>
+            <maxRealizedPnL             type="double"           desc="max realized pnl"/>
+            <maxUnrealizedDrawdown      type="double"           desc="max unrealized pnl"/>
+            <maxRealizedDrawdown        type="double"           desc="max realized pnl"/>
+            <position                   type="tw::price::Size"  desc="position"/>
+        </PnL>
+    </RiskDefs>
+    <SQLDefs>
+        <Tables>
+            <Accounts>
+                <Fields>
+                    <Account/>
+                </Fields>
+                <PrimaryKeys>
+                    <id             auto_increment="true"/>
+                </PrimaryKeys>
+                <Keys>
+                    <name           length="64"/>
+                </Keys>
+                <Required>
+                    <maxRealizedDrawdown/>
+                    <maxUnrealizedDrawdown/>
+                    <maxRealizedLoss/>
+                    <maxUnrealizedLoss/>
+                    <maxTotalLoss/>
+                    <tradeEnabled/>
+                </Required>
+            </Accounts>
+            <Strategies>
+                <Fields>
+                    <Strategy/>
+                </Fields>
+                <PrimaryKeys>
+                    <id             auto_increment="true"/>
+                </PrimaryKeys>
+                <Keys>
+                    <name           length="64"/>
+                    <accountId      length="64"/>
+                </Keys>
+                <Required>
+                    <maxRealizedDrawdown/>
+                    <maxUnrealizedDrawdown/>
+                    <maxRealizedLoss/>
+                    <maxUnrealizedLoss/>
+                </Required>
+            </Strategies>
+            <AccountsRiskParams>
+                <Fields>
+                    <AccountRiskParams/>
+                </Fields>
+                <Keys>
+                    <accountId      length="64"/>
+                    <displayName    length="64"/>
+                    <exchange       length="64"/>
+                </Keys>
+                <Required>
+                    <maxPos/>
+                    <tradeEnabled/>
+                </Required>
+            </AccountsRiskParams>
+        </Tables>
+        <Queries>
+            <Accounts_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Accounts"/>
+                <Outputs>
+                    <Account/>
+                </Outputs>
+            </Accounts_GetAll>
+            <Strategies_GetAll>
+                <Type value="SELECT"/>
+                <Source value="Strategies"/>
+                <Outputs>
+                    <Strategy/>
+                </Outputs>
+            </Strategies_GetAll>
+            <Strategy_GetOrCreate>
+                <Type value="SELECT OR INSERT"/>
+                <Source value="Strategies"/>
+                <Params>
+                    <Strategy output="true">
+                        <Filters>
+                            <name/>
+                            <accountId/>
+                        </Filters>
+                    </Strategy>
+                </Params>
+            </Strategy_GetOrCreate>            
+            <Strategy_Save>
+                <Type value="REPLACE"/>
+                <Source value="Strategies"/>
+                <Params>
+                    <Strategy/>
+                </Params>
+            </Strategy_Save>
+            <AccountsRiskParams_GetAll>
+                <Type value="SELECT"/>
+                <Source value="AccountsRiskParams"/>
+                <Outputs>
+                    <AccountRiskParams/>
+                </Outputs>
+            </AccountsRiskParams_GetAll>
+        </Queries>
+    </SQLDefs>
+</Namespace>
